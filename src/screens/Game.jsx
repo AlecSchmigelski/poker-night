@@ -6,6 +6,7 @@ import { Avatar, Dock, MoneyInput, Sheet } from '../components/UI'
 import { ChipSheet } from '../components/ChipSheet'
 import { SignBuyIn } from './SignBuyIn'
 import { BuyInLog } from './BuyInLog'
+import { ShareTable } from './ShareTable'
 
 export function Game() {
   const { state, dispatch, player } = useStore()
@@ -17,6 +18,16 @@ export function Game() {
 
   const seated = new Set(game.seats.map((s) => s.playerId))
   const bench = state.players.filter((p) => !seated.has(p.id))
+
+  const isRebuy = (playerId) =>
+    (game.seats.find((s) => s.playerId === playerId)?.buyIns.length ?? 0) > 0
+
+  // The opening buy-in happens with everyone at the table paying up front, so
+  // it stays a single tap. A reload is the credit event worth signing for.
+  const request = (playerId, amount) => {
+    if (isRebuy(playerId)) setPending({ playerId, amount })
+    else commit(playerId, amount, null)
+  }
 
   const commit = (playerId, amount, signature) => {
     dispatch({
@@ -70,8 +81,8 @@ export function Game() {
                 <div className={`amt num${total === 0 ? ' zero' : ''}`}>{fmt(total)}</div>
                 <button
                   className="plus"
-                  aria-label={`Buy in ${fmt(game.defaultBuyIn)} for ${p.name}`}
-                  onClick={() => setPending({ playerId: seat.playerId, amount: game.defaultBuyIn })}
+                  aria-label={`${seat.buyIns.length ? 'Rebuy' : 'Buy in'} ${fmt(game.defaultBuyIn)} for ${p.name}`}
+                  onClick={() => request(seat.playerId, game.defaultBuyIn)}
                   {...holdProps(seat.playerId)}
                 >
                   +
@@ -82,8 +93,11 @@ export function Game() {
         </div>
 
         <div className="subrow">
-          <button className="lnk" onClick={() => setSheet('add')}>Add player</button>
+          <button className="lnk" onClick={() => setSheet('share')}>Share the table</button>
           <button className="lnk" onClick={() => setSheet('log')}>Buy-in log</button>
+        </div>
+        <div className="subrow" style={{ marginTop: 0 }}>
+          <button className="lnk" onClick={() => setSheet('add')}>Add player</button>
           <button className="lnk" onClick={() => setSheet('menu')}>Options</button>
         </div>
       </div>
@@ -108,6 +122,8 @@ export function Game() {
       )}
 
       {sheet === 'log' && <BuyInLog game={game} onClose={() => setSheet(null)} />}
+
+      {sheet === 'share' && <ShareTable game={game} onClose={() => setSheet(null)} />}
 
       {sheet === 'add' && (
         <Sheet title="Add a player" hint="They join with no buy-in yet." onClose={() => setSheet(null)}>
@@ -140,8 +156,9 @@ export function Game() {
           onCents={setCustom}
           onClose={() => setSheet(null)}
           onNext={(amount) => {
+            const playerId = sheet.slice(7)
             setSheet(null)
-            setPending({ playerId: sheet.slice(7), amount })
+            request(playerId, amount)
           }}
         />
       )}
@@ -209,7 +226,7 @@ function CustomBuyIn({ playerId, cents, onCents, onClose, onNext }) {
         disabled={amount <= 0}
         onClick={() => onNext(amount)}
       >
-        {amount > 0 ? `Sign for ${fmt(amount)}` : 'Enter an amount'}
+        {amount > 0 ? `Continue with ${fmt(amount)}` : 'Enter an amount'}
       </button>
       <button
         className="btn ghost danger"

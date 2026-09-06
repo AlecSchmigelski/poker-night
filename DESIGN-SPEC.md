@@ -44,7 +44,7 @@ Explicitly out of scope. Do not design for these.
 | Tournaments, blinds, payout structures | Cash game only for v1 |
 | Side games, prop bets, high-hand pots | Cut from scope |
 | Hand history, odds, or anything about *playing* poker | This is bookkeeping, not gameplay |
-| Multi-device sync, guest views, accounts, login | Host's phone is the only client |
+| Multi-device *sync*, accounts, login | Host's phone is the only writer |
 | Real money movement | See §11 |
 | Desktop layout | Phone portrait only |
 
@@ -466,15 +466,43 @@ functional but unremarkable. The app is used at a table with friends at midnight
 there may be a warmer or more distinctive direction that does not cost legibility.
 Show me one.
 
+## 14a. The spectator link
+
+The host can share a read-only view of the table to the group chat. **The whole
+table travels inside the URL fragment**, base64url-encoded, so there is no server,
+no account, and nothing to host beyond the static app.
+
+The consequence has to be stated plainly everywhere it appears: **it is a
+snapshot, not a live feed.** The numbers are frozen at the moment the link was
+generated, because there is nowhere for a viewer to poll. The share sheet says
+so, and the spectator screen carries a `Read-only · as of 11:47 PM` ribbon under
+the header plus a closing line telling the viewer to ask for a fresh link.
+
+- Opening the link renders `Spectator`, never the app. No tabs, no dock, no
+  controls, and the host's own stored game is never read on that path.
+- **Signatures are never included** in the payload — they are the private half of
+  the record, and they would dominate the size.
+- A settled game carries the payment list too, so "who pays who" can go straight
+  into the chat.
+- A mangled or truncated link shows a plain explanation, never a crash.
+- Payload is ~230 characters for three players, so it survives any chat client.
+
+**If a genuinely live view is ever wanted**, that is the point where this app
+grows a backend: a tiny store the host pushes to and viewers poll or subscribe.
+That is a real change in shape — hosting, an identifier per game, and a privacy
+question about who can read a table — not an increment on this.
+
 ## 15a. Signed buy-ins and the log
 
-Tapping `+` opens a confirmation screen the buying-in player signs, rather than
-recording the buy-in instantly.
+**Rebuys only.** A player's first buy-in of the night commits on a single tap,
+because everyone is standing at the table paying up front — there is nothing to
+dispute. Every buy-in after that opens a confirmation screen they sign.
 
-**This is a deliberate exception to §4.2 and §4.3** — it puts a confirmation in
-front of the most frequent action in the app. It earns that because a home game
-runs on credit: people buy in for hours and settle at the end, and a signature is
-the record that stops "I only bought in twice" at 1am.
+**The rebuy case is a deliberate exception to §4.2 and §4.3** — it puts a
+confirmation in front of a frequent action. It earns that because reloads are
+where a home game runs on credit: people buy in again for hours and settle at the
+end, and a signature is the record that stops "I only rebought twice" at 1am.
+Scoping it to rebuys keeps the opening round at one tap per player.
 
 - **Sign screen.** Name at 30px and amount at 58px — the two things the person
   signing reads from across the table — then a short pad and a Verify button.
@@ -482,7 +510,9 @@ the record that stops "I only bought in twice" at 1am.
 - **Add without signing** is always offered. Someone stepping outside must not
   block their own rebuy, and a log that forces a signature just gets fake ones.
 - **The log** lists every buy-in of the night in order: time, player, the mark or
-  an `unsigned` chip, and the amount, totalling to the pot. Reachable from the
+  an `unsigned` chip, and the amount, totalling to the pot. Opening buy-ins read
+  as a quiet `buy-in` rather than being flagged — they are not meant to carry a
+  mark, so counting them as gaps would make the unsigned count meaningless. Reachable from the
   Game screen during play and from any past game in the Ledger.
 
 Signatures are stored as normalised stroke coordinates, not images — see the note

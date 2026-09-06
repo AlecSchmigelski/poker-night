@@ -646,3 +646,59 @@ input { -webkit-appearance: none; }
   padding: 5px 10px;
   white-space: nowrap;
 }
+
+/* ---------- spectator ---------- */
+
+.ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--smoke);
+  background: var(--felt);
+  border-bottom: 1px solid var(--hairline);
+  padding: 9px 16px;
+  text-align: center;
+  position: relative;
+  z-index: 4;
+}
+.ribbon .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brass);
+  flex: 0 0 auto;
+}
+.spectator-foot {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--smoke);
+  line-height: 1.6;
+  padding: 26px 24px 10px;
+}
+
+/* ---------- share link ---------- */
+
+.linkbox {
+  background: var(--rail);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-ctl);
+  padding: 12px 14px;
+  font-size: 12.5px;
+  color: var(--smoke);
+  word-break: break-all;
+  line-height: 1.5;
+  max-height: 92px;
+  overflow: hidden;
+}
+.warn {
+  background: rgba(228, 105, 90, 0.08);
+  border: 1px solid rgba(228, 105, 90, 0.4);
+  border-radius: var(--r-ctl);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--down);
+  line-height: 1.5;
+  margin-top: 12px;
+}

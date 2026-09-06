@@ -40,7 +40,21 @@ money**, so never use the accent for a positive number or the up-colour for a
 button. Tokens live at the top of `src/index.css`; the frames they came from are
 `DESIGN-SPEC.md` §10.
 
+## The spectator link
+
+`src/lib/share.js` encodes the table into the URL fragment; `#g=<payload>` boots
+`Spectator` instead of `App` (see `main.jsx`), and that path never reads the
+host's localStorage. It is a **snapshot, not a live feed** — say so in any UI
+that surfaces it, and never imply the viewer's numbers update. Signatures are
+deliberately excluded from the payload. Bump `VERSION` in `share.js` if the
+shape changes; `decodeSnapshot` returns null on an unknown version rather than
+guessing, and callers must render an explanation, not crash.
+
 ## Signatures
+
+Only **rebuys** are signed. A player's first buy-in commits on one tap; every
+buy-in after it opens the sign screen. Keep that split — it is what stops the
+opening round from becoming four modal screens in a row.
 
 Buy-ins carry an optional signature, stored as **normalised 0–1 stroke
 coordinates** (`[[[x,y], ...], ...]`), never a PNG data URL. A night can hold

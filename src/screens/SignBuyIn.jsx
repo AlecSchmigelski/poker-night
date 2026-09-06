@@ -3,8 +3,9 @@ import { fmt } from '../lib/money'
 import { Sheet } from '../components/UI'
 import { SignaturePad } from '../components/Signature'
 
-// Name and amount are the two things the person signing needs to read from
-// across the table, so they get the biggest type in the app.
+// Only ever shown for a rebuy — the opening buy-in is a single tap. Name and
+// amount are what the person signing reads from across the table, so they get
+// the biggest type in the app.
 export function SignBuyIn({ player, amount, onConfirm, onClose }) {
   const [strokes, setStrokes] = useState(null)
 
@@ -13,7 +14,7 @@ export function SignBuyIn({ player, amount, onConfirm, onClose }) {
       <div className="sign-head">
         <div className="who-name">{player.name}</div>
         <div className="who-amount num">{fmt(amount)}</div>
-        <div className="who-note">Buying in for {fmt(amount)}. Sign to confirm.</div>
+        <div className="who-note">Rebuying for {fmt(amount)}. Sign to confirm.</div>
       </div>
 
       <SignaturePad onChange={setStrokes} />

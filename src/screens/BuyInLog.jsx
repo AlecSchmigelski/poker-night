@@ -12,11 +12,17 @@ const time = (at) =>
 export function BuyInLog({ game, onClose }) {
   const { player } = useStore()
 
+  // A player's first buy-in is expected to be unsigned — it is taken with
+  // everyone at the table. Only reloads are meant to carry a mark, so only a
+  // reload without one counts as a gap in the record.
   const entries = game.seats
-    .flatMap((seat) => seat.buyIns.map((b) => ({ ...b, playerId: seat.playerId })))
+    .flatMap((seat) =>
+      seat.buyIns.map((b, i) => ({ ...b, playerId: seat.playerId, rebuy: i > 0 })),
+    )
     .sort((a, b) => a.at - b.at)
 
-  const unsigned = entries.filter((e) => !e.signature).length
+  const unsigned = entries.filter((e) => e.rebuy && !e.signature).length
+  const rebuys = entries.filter((e) => e.rebuy).length
 
   return (
     <Sheet
@@ -24,9 +30,9 @@ export function BuyInLog({ game, onClose }) {
       hint={
         entries.length === 0
           ? undefined
-          : `${entries.length} buy-in${entries.length === 1 ? '' : 's'}${
-              unsigned ? ` · ${unsigned} unsigned` : ' · all signed'
-            }`
+          : `${entries.length} buy-in${entries.length === 1 ? '' : 's'} · ${rebuys} rebuy${
+              rebuys === 1 ? '' : 's'
+            }${rebuys === 0 ? '' : unsigned ? ` · ${unsigned} unsigned` : ' · all signed'}`
       }
       onClose={onClose}
     >
@@ -45,8 +51,10 @@ export function BuyInLog({ game, onClose }) {
                 </div>
                 {e.signature ? (
                   <SignatureMark strokes={e.signature} />
-                ) : (
+                ) : e.rebuy ? (
                   <span className="unsigned">unsigned</span>
+                ) : (
+                  <span className="meta">buy-in</span>
                 )}
                 <div className="amt sm num">{fmt(e.amount)}</div>
               </div>
