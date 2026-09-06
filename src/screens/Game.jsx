@@ -4,24 +4,30 @@ import { fmt } from '../lib/money'
 import { potTotal } from '../lib/settle'
 import { Avatar, Dock, MoneyInput, Sheet } from '../components/UI'
 import { ChipSheet } from '../components/ChipSheet'
+import { SignBuyIn } from './SignBuyIn'
+import { BuyInLog } from './BuyInLog'
 
 export function Game() {
   const { state, dispatch, player } = useStore()
   const game = state.game
   const [sheet, setSheet] = useState(null)
   const [custom, setCustom] = useState(null)
+  // The buy-in waiting on a signature.
+  const [pending, setPending] = useState(null)
 
   const seated = new Set(game.seats.map((s) => s.playerId))
   const bench = state.players.filter((p) => !seated.has(p.id))
 
-  const buyIn = (playerId, amount) => {
+  const commit = (playerId, amount, signature) => {
     dispatch({
       type: 'BUY_IN',
       playerId,
       amount,
+      signature,
       label: { text: player(playerId).name, amount: `+${fmt(amount)}` },
     })
     if (navigator.vibrate) navigator.vibrate(8)
+    setPending(null)
   }
 
   // Long-press opens the custom amount sheet without stealing the plain tap.
@@ -64,8 +70,8 @@ export function Game() {
                 <div className={`amt num${total === 0 ? ' zero' : ''}`}>{fmt(total)}</div>
                 <button
                   className="plus"
-                  aria-label={`Add a ${fmt(game.defaultBuyIn)} buy-in for ${p.name}`}
-                  onClick={() => buyIn(seat.playerId, game.defaultBuyIn)}
+                  aria-label={`Buy in ${fmt(game.defaultBuyIn)} for ${p.name}`}
+                  onClick={() => setPending({ playerId: seat.playerId, amount: game.defaultBuyIn })}
                   {...holdProps(seat.playerId)}
                 >
                   +
@@ -77,7 +83,8 @@ export function Game() {
 
         <div className="subrow">
           <button className="lnk" onClick={() => setSheet('add')}>Add player</button>
-          <button className="lnk" onClick={() => setSheet('menu')}>Game options</button>
+          <button className="lnk" onClick={() => setSheet('log')}>Buy-in log</button>
+          <button className="lnk" onClick={() => setSheet('menu')}>Options</button>
         </div>
       </div>
 
@@ -90,6 +97,17 @@ export function Game() {
           {potTotal(game) === 0 ? 'Nobody has bought in' : 'Cash out'}
         </button>
       </Dock>
+
+      {pending && (
+        <SignBuyIn
+          player={player(pending.playerId)}
+          amount={pending.amount}
+          onClose={() => setPending(null)}
+          onConfirm={(signature) => commit(pending.playerId, pending.amount, signature)}
+        />
+      )}
+
+      {sheet === 'log' && <BuyInLog game={game} onClose={() => setSheet(null)} />}
 
       {sheet === 'add' && (
         <Sheet title="Add a player" hint="They join with no buy-in yet." onClose={() => setSheet(null)}>
@@ -121,9 +139,9 @@ export function Game() {
           cents={custom}
           onCents={setCustom}
           onClose={() => setSheet(null)}
-          onAdd={(amount) => {
-            buyIn(sheet.slice(7), amount)
+          onNext={(amount) => {
             setSheet(null)
+            setPending({ playerId: sheet.slice(7), amount })
           }}
         />
       )}
@@ -172,7 +190,7 @@ export function Game() {
   )
 }
 
-function CustomBuyIn({ playerId, cents, onCents, onClose, onAdd }) {
+function CustomBuyIn({ playerId, cents, onCents, onClose, onNext }) {
   const { dispatch, player } = useStore()
   const amount = cents ?? 0
   return (
@@ -185,8 +203,13 @@ function CustomBuyIn({ playerId, cents, onCents, onClose, onAdd }) {
         <div className="who"><div className="nm sm">Buy-in</div></div>
         <MoneyInput autoFocus cents={cents} onCents={onCents} />
       </div>
-      <button className="btn" style={{ marginTop: 8 }} disabled={amount <= 0} onClick={() => onAdd(amount)}>
-        {amount > 0 ? `Add ${fmt(amount)}` : 'Enter an amount'}
+      <button
+        className={`btn${amount > 0 ? '' : ' off'}`}
+        style={{ marginTop: 8 }}
+        disabled={amount <= 0}
+        onClick={() => onNext(amount)}
+      >
+        {amount > 0 ? `Sign for ${fmt(amount)}` : 'Enter an amount'}
       </button>
       <button
         className="btn ghost danger"

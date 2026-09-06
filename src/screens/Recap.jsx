@@ -3,11 +3,13 @@ import { useStore } from '../store'
 import { fmt } from '../lib/money'
 import { canvasToBlob, duration, recapStats, renderRecapCanvas } from '../lib/recap'
 import { Sheet } from '../components/UI'
+import { BuyInLog } from './BuyInLog'
 
 export function Recap({ game, onClose }) {
   const { player } = useStore()
   const [url, setUrl] = useState(null)
   const [status, setStatus] = useState(null)
+  const [log, setLog] = useState(false)
   const s = recapStats(game, player)
 
   useEffect(() => {
@@ -82,6 +84,11 @@ export function Recap({ game, onClose }) {
       <a className="btn ghost" href={url || undefined} download={filename} style={{ marginTop: 8 }}>
         Save image
       </a>
+      <button className="btn ghost" onClick={() => setLog(true)}>
+        Buy-in log
+      </button>
+
+      {log && <BuyInLog game={game} onClose={() => setLog(false)} />}
     </Sheet>
   )
 }

@@ -121,7 +121,18 @@ function reducer(state, action) {
           ...state.game,
           seats: state.game.seats.map((s) =>
             s.playerId === action.playerId
-              ? { ...s, buyIns: [...s.buyIns, { id: uid(), amount: action.amount, at: Date.now() }] }
+              ? {
+                  ...s,
+                  buyIns: [
+                    ...s.buyIns,
+                    {
+                      id: uid(),
+                      amount: action.amount,
+                      at: Date.now(),
+                      signature: action.signature ?? null,
+                    },
+                  ],
+                }
               : s,
           ),
         },

@@ -466,6 +466,33 @@ functional but unremarkable. The app is used at a table with friends at midnight
 there may be a warmer or more distinctive direction that does not cost legibility.
 Show me one.
 
+## 15a. Signed buy-ins and the log
+
+Tapping `+` opens a confirmation screen the buying-in player signs, rather than
+recording the buy-in instantly.
+
+**This is a deliberate exception to §4.2 and §4.3** — it puts a confirmation in
+front of the most frequent action in the app. It earns that because a home game
+runs on credit: people buy in for hours and settle at the end, and a signature is
+the record that stops "I only bought in twice" at 1am.
+
+- **Sign screen.** Name at 30px and amount at 58px — the two things the person
+  signing reads from across the table — then a short pad and a Verify button.
+  Verify stays disabled until there is a mark.
+- **Add without signing** is always offered. Someone stepping outside must not
+  block their own rebuy, and a log that forces a signature just gets fake ones.
+- **The log** lists every buy-in of the night in order: time, player, the mark or
+  an `unsigned` chip, and the amount, totalling to the pot. Reachable from the
+  Game screen during play and from any past game in the Ledger.
+
+Signatures are stored as normalised stroke coordinates, not images — see the note
+in `CLAUDE.md`. They render as SVG, so a mark is legible at 34px in the log and
+sharp if it is ever shown larger.
+
+**Still to design:** the sign screen and log were built to the existing component
+language rather than drawn. Worth a proper pass, particularly the pad — it is the
+only place in the app a guest, rather than the host, touches the phone.
+
 ## 16a. Built beyond the frames
 
 Two features from the roadmap ship in this design language but were not drawn:
@@ -487,9 +514,10 @@ app) and the live guest view (needs a backend, ruled out by §3).
 ```
 Player  { id, name, color, venmo, cashapp }
 Chip    { color, value }
+Signature  [[[x, y], ...], ...]   normalised 0–1 strokes, or null
 Group   { id, name, playerIds[] }
 Game    { id, startedAt, defaultBuyIn, phase, seats[], payments[] }
-Seat    { playerId, buyIns[{ id, amount, at }], cashOut }
+Seat    { playerId, buyIns[{ id, amount, at, signature }], cashOut }
 Payment { id, from, to, amount, paid }
 ```
 

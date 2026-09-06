@@ -40,6 +40,18 @@ money**, so never use the accent for a positive number or the up-colour for a
 button. Tokens live at the top of `src/index.css`; the frames they came from are
 `DESIGN-SPEC.md` §10.
 
+## Signatures
+
+Buy-ins carry an optional signature, stored as **normalised 0–1 stroke
+coordinates** (`[[[x,y], ...], ...]`), never a PNG data URL. A night can hold
+thirty signatures and localStorage is small: strokes cost a few hundred bytes
+where base64 costs tens of kilobytes, and they stay sharp at any size because
+they render as SVG. Points closer than 0.004 apart are dropped on capture.
+
+`signature: null` means the buy-in was added without one, which the log surfaces
+rather than hides. Keep the "Add without signing" path — a log that forces a
+signature only collects fake ones.
+
 ## Payments
 
 Venmo and Cash App have no peer-to-peer API. `src/lib/payments.js` builds deep links
