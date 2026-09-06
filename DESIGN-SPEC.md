@@ -629,10 +629,21 @@ Two features from the roadmap ship in this design language but were not drawn:
   what each colour is worth, and get a suggested starting stack for the buy-in,
   weighted toward small chips so people can actually bet. Purely a counting aid;
   it never touches the money.
-- **Recap card** — a shareable 1080×1350 PNG drawn on a canvas, reached from
-  Settle Up and from any past game in the Ledger. Carries the standings plus three
-  superlatives (took the night, most reloads, funded it). Self-contained: no
-  library, no fonts to load, no network.
+- **Recap card** — a shareable PNG drawn on a canvas, reached from Settle Up and
+  from any past game in the Ledger. Self-contained: no library, no fonts to load,
+  no network.
+
+  **It is sized for a chat thumbnail, not for full-screen viewing.** At 1080
+  wide scaled into a message thread it renders around 400px, so everything is
+  roughly a third of its nominal size — type that looks generous at full size
+  vanishes there. The card is **1080 wide with a height that grows with the
+  field** (900 heads-up, ~1580 for six) rather than a fixed frame that squeezes
+  rows. A squeezed row is illegible at thumbnail size; a taller image just
+  scrolls.
+
+  Restraint is deliberate: one accent colour, one soft wash at the top, plain
+  footer lines instead of a boxed list of superlatives, and no emoji. The
+  hierarchy is date → totals → standings, and nothing competes with it.
 
 Deliberately **not** built: a blind timer (tournament-only, and this is a cash-game
 app) and the live guest view (needs a backend, ruled out by §3).

@@ -34,12 +34,27 @@ export function duration(minutes) {
 }
 
 const W = 1080
-const H = 1350
+const M = 84 // margin
+const ROW = 132 // one standings row
+const MAX_ROWS = 10
 
-// Draw the share card. Everything is hand-drawn on a canvas so the export stays
-// self-contained — no html2canvas, no fonts to load, no network.
+// Drawn on a canvas so the export stays self-contained — no library, no fonts
+// to load, no network.
+//
+// Sizes are set for how this is actually seen: scaled to a few hundred pixels
+// wide in a group chat. The card grows taller with the field rather than
+// shrinking the type to fit a fixed frame — a squeezed row is unreadable at
+// thumbnail size, and a tall image just scrolls.
 export function renderRecapCanvas(game, player) {
   const s = recapStats(game, player)
+  const notes = superlatives(game, s, player)
+  const shown = s.ranked.slice(0, MAX_ROWS)
+  const hidden = s.ranked.length - shown.length
+
+  const top = 560
+  const footer = (notes.length ? notes.length * 54 + 40 : 0) + (hidden ? 54 : 0)
+  const H = top + shown.length * ROW + footer + 76
+
   const c = document.createElement('canvas')
   c.width = W
   c.height = H
@@ -50,120 +65,131 @@ export function renderRecapCanvas(game, player) {
   g.fillStyle = '#141110'
   g.fillRect(0, 0, W, H)
 
-  // The lamp, same move as the app header.
-  const lamp = g.createRadialGradient(W / 2, 40, 0, W / 2, 40, 620)
-  lamp.addColorStop(0, 'rgba(233,161,59,0.20)')
-  lamp.addColorStop(0.45, 'rgba(233,161,59,0.06)')
+  // One restrained wash at the top, not a gradient over the whole card.
+  const lamp = g.createRadialGradient(W / 2, -60, 0, W / 2, -60, 680)
+  lamp.addColorStop(0, 'rgba(233,161,59,0.16)')
   lamp.addColorStop(1, 'rgba(233,161,59,0)')
   g.fillStyle = lamp
-  g.fillRect(0, 0, W, 700)
+  g.fillRect(0, 0, W, 640)
 
   g.textBaseline = 'alphabetic'
+
   g.fillStyle = '#E9A13B'
-  g.font = font(30, 640)
-  g.letterSpacing = '6px'
-  g.fillText('POKER NIGHT', 72, 130)
+  g.font = font(34, 640)
+  g.letterSpacing = '9px'
+  g.fillText('POKER NIGHT', M, 150)
   g.letterSpacing = '0px'
 
+  // The date is the headline. Shrink to fit rather than truncate a weekday.
+  const date = s.date.toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })
   g.fillStyle = '#F3ECE3'
-  g.font = font(78, 680)
-  g.fillText(
-    s.date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }),
-    72,
-    226,
-  )
+  let dateSize = 92
+  g.font = font(dateSize, 680)
+  while (g.measureText(date).width > W - M * 2 && dateSize > 52) {
+    dateSize -= 2
+    g.font = font(dateSize, 680)
+  }
+  g.fillText(date, M, 272)
 
-  // Headline stats.
   const stats = [
     ['On the table', fmt(s.pot)],
     ['Players', String(s.players)],
     ['Ran for', s.minutes ? duration(s.minutes) : '—'],
   ]
+  const colW = (W - M * 2) / 3
   stats.forEach(([k, v], i) => {
-    const x = 72 + i * 316
+    const x = M + i * colW
     g.fillStyle = '#A69890'
-    g.font = font(26, 500)
-    g.fillText(k, x, 300)
+    g.font = font(32, 500)
+    g.fillText(k, x, 384)
     g.fillStyle = '#F3ECE3'
-    g.font = font(54, 660)
-    g.fillText(v, x, 362)
+    g.font = font(70, 660)
+    g.fillText(v, x, 460)
   })
 
   g.strokeStyle = '#38302B'
   g.lineWidth = 2
   g.beginPath()
-  g.moveTo(72, 416)
-  g.lineTo(W - 72, 416)
+  g.moveTo(M, 512)
+  g.lineTo(W - M, 512)
   g.stroke()
 
-  // Standings.
-  let y = 492
-  const rowH = 92
-  const shown = s.ranked.slice(0, 7)
-  for (const [i, n] of shown.entries()) {
+  shown.forEach((n, i) => {
     const p = player(n.playerId)
+    const y = top + ROW * i + ROW / 2
 
     g.fillStyle = '#A69890'
-    g.font = font(28, 500)
-    g.fillText(String(i + 1), 74, y + 10)
+    g.font = font(32, 500)
+    g.fillText(String(i + 1), M, y + 12)
 
+    const r = 38
+    const cx = M + 58 + r
     g.beginPath()
-    g.arc(150, y, 30, 0, Math.PI * 2)
+    g.arc(cx, y, r, 0, Math.PI * 2)
     g.fillStyle = p.color
     g.fill()
 
     g.fillStyle = '#14100E'
-    g.font = font(24, 660)
+    g.font = font(30, 660)
     g.textAlign = 'center'
-    g.fillText(initials(p.name), 150, y + 9)
+    g.fillText(initials(p.name), cx, y + 11)
     g.textAlign = 'left'
+
+    // Reserve the right-hand column for the number before measuring the name.
+    g.font = font(62, 680)
+    const netText = fmtSigned(n.net)
+    const netW = g.measureText(netText).width
+    const textX = cx + r + 32
 
     g.fillStyle = '#F3ECE3'
-    g.font = font(38, 560)
-    g.fillText(clip(g, p.name, 480), 202, y + 2)
+    g.font = font(54, 580)
+    g.fillText(clip(g, p.name, W - M - textX - netW - 40), textX, y - 8)
 
     g.fillStyle = '#A69890'
-    g.font = font(24, 500)
-    g.fillText(`in ${fmt(n.buyIn)} · out ${fmt(n.cashOut)}`, 202, y + 36)
+    g.font = font(34, 500)
+    g.fillText(`in ${fmt(n.buyIn)} · out ${fmt(n.cashOut)}`, textX, y + 38)
 
     g.fillStyle = n.net > 0 ? '#5DBE8C' : n.net < 0 ? '#E4695A' : '#A69890'
-    g.font = font(42, 680)
+    g.font = font(62, 680)
     g.textAlign = 'right'
-    g.fillText(fmtSigned(n.net), W - 72, y + 12)
+    g.fillText(netText, W - M, y + 20)
     g.textAlign = 'left'
+  })
 
-    y += rowH
+  // Plain lines. No box, no bullets, no emoji.
+  let fy = top + shown.length * ROW + 62
+  g.fillStyle = '#A69890'
+  g.font = font(34, 520)
+  if (hidden) {
+    g.fillText(`and ${hidden} more`, M, fy)
+    fy += 54
   }
+  notes.forEach((t) => {
+    g.fillText(clip(g, t, W - M * 2), M, fy)
+    fy += 54
+  })
 
-  // Superlatives.
-  const notes = []
-  if (s.winner && s.winner.net > 0) notes.push(`${player(s.winner.playerId).name} took the night`)
-  if (s.mostRebuys) {
-    notes.push(
+  return c
+}
+
+// The two facts worth reading that the standings do not already show.
+function superlatives(game, s, player) {
+  const out = []
+  if (s.mostRebuys && s.mostRebuyCount > 0) {
+    out.push(
       `${player(s.mostRebuys.playerId).name} reloaded ${s.mostRebuyCount} time${s.mostRebuyCount === 1 ? '' : 's'}`,
     )
   }
-  if (s.loser && s.loser.net < 0) notes.push(`${player(s.loser.playerId).name} funded it`)
   if (game.bombPot?.count > 0) {
-    notes.push(
+    out.push(
       `${game.bombPot.count} bomb pot${game.bombPot.count === 1 ? '' : 's'} at ${fmt(game.bombPot.ante)} a head`,
     )
   }
-
-  if (notes.length) {
-    const boxY = Math.max(y + 24, H - 232)
-    g.fillStyle = '#1D1917'
-    roundRect(g, 72, boxY, W - 144, 150, 22)
-    g.fill()
-    g.strokeStyle = '#38302B'
-    g.stroke()
-
-    g.fillStyle = '#A69890'
-    g.font = font(28, 500)
-    notes.slice(0, 3).forEach((t, i) => g.fillText(clip(g, t, W - 220), 108, boxY + 52 + i * 40))
-  }
-
-  return c
+  return out.slice(0, 2)
 }
 
 function initials(name) {
@@ -177,15 +203,6 @@ function clip(g, text, max) {
   return `${t}…`
 }
 
-function roundRect(g, x, y, w, h, r) {
-  g.beginPath()
-  g.moveTo(x + r, y)
-  g.arcTo(x + w, y, x + w, y + h, r)
-  g.arcTo(x + w, y + h, x, y + h, r)
-  g.arcTo(x, y + h, x, y, r)
-  g.arcTo(x, y, x + w, y, r)
-  g.closePath()
-}
 
 export function canvasToBlob(canvas) {
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
