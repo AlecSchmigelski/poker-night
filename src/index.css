@@ -425,7 +425,16 @@ input { -webkit-appearance: none; }
 .btn:disabled:active { transform: none; }
 
 .subrow { display: flex; gap: 10px; margin: 14px 0 4px; }
-.subrow .lnk {
+/* Two-up block. One grid rather than stacked flex rows, so a single gap governs
+   both axes — margins between rows are not the same measurement as a flex gap. */
+.subgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0 4px;
+}
+.subrow .lnk,
+.subgrid .lnk {
   flex: 1;
   text-align: center;
   font-size: 14px;

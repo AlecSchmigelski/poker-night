@@ -107,11 +107,9 @@ export function Game() {
           })}
         </div>
 
-        <div className="subrow">
+        <div className="subgrid">
           <button className="lnk" onClick={() => setSheet('share')}>Share the table</button>
           <button className="lnk" onClick={() => setSheet('log')}>Buy-in log</button>
-        </div>
-        <div className="subrow" style={{ marginTop: 0 }}>
           <button className="lnk" onClick={() => setSheet('add')}>Add player</button>
           <button className="lnk" onClick={() => setSheet('menu')}>Options</button>
         </div>
