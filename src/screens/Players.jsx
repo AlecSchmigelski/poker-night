@@ -3,7 +3,7 @@ import { useStore } from '../store'
 import { Avatar, Dock, Empty, Sheet } from '../components/UI'
 
 export function Players() {
-  const { state, dispatch } = useStore()
+  const { state } = useStore()
   const [editing, setEditing] = useState(null)
   const [group, setGroup] = useState(null)
   const [adding, setAdding] = useState(false)

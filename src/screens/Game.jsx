@@ -13,8 +13,8 @@ export function Game() {
   const { state, dispatch, player } = useStore()
   const game = state.game
   const [sheet, setSheet] = useState(null)
-  const [custom, setCustom] = useState(null)
-  // The buy-in waiting on a signature.
+  // The seat whose amount is being chosen, then the buy-in waiting on a signature.
+  const [choosing, setChoosing] = useState(null)
   const [pending, setPending] = useState(null)
 
   const seated = new Set(game.seats.map((s) => s.playerId))
@@ -40,25 +40,6 @@ export function Game() {
     })
     if (navigator.vibrate) navigator.vibrate(8)
     setPending(null)
-  }
-
-  // Long-press opens the custom amount sheet without stealing the plain tap.
-  const holdProps = (playerId) => {
-    let timer
-    const start = () => {
-      timer = setTimeout(() => {
-        setCustom(null)
-        setSheet(`custom:${playerId}`)
-        timer = null
-      }, 500)
-    }
-    const cancel = () => timer && clearTimeout(timer)
-    return {
-      onPointerDown: start,
-      onPointerUp: cancel,
-      onPointerLeave: cancel,
-      onContextMenu: (e) => e.preventDefault(),
-    }
   }
 
   return (
@@ -87,12 +68,11 @@ export function Game() {
                 </div>
                 <div className={`amt num${total === 0 ? ' zero' : ''}`}>{fmt(total)}</div>
                 <button
-                  className="plus"
-                  aria-label={`${seat.buyIns.length ? 'Rebuy' : 'Buy in'} ${fmt(game.defaultBuyIn)} for ${p.name}`}
-                  onClick={() => request(seat.playerId, game.defaultBuyIn)}
-                  {...holdProps(seat.playerId)}
+                  className={`rebuy${seat.buyIns.length ? '' : ' first'}`}
+                  aria-label={`${seat.buyIns.length ? 'Rebuy' : 'Buy in'} for ${p.name}`}
+                  onClick={() => setChoosing(seat.playerId)}
                 >
-                  +
+                  {seat.buyIns.length ? 'Rebuy' : 'Buy in'}
                 </button>
               </div>
             )
@@ -156,16 +136,15 @@ export function Game() {
         </Sheet>
       )}
 
-      {sheet?.startsWith('custom:') && (
-        <CustomBuyIn
-          playerId={sheet.slice(7)}
-          cents={custom}
-          onCents={setCustom}
-          onClose={() => setSheet(null)}
-          onNext={(amount) => {
-            const playerId = sheet.slice(7)
-            setSheet(null)
-            request(playerId, amount)
+      {choosing && (
+        <ChooseAmount
+          playerId={choosing}
+          defaultBuyIn={game.defaultBuyIn}
+          isRebuy={isRebuy(choosing)}
+          onClose={() => setChoosing(null)}
+          onPick={(amount) => {
+            setChoosing(null)
+            request(choosing, amount)
           }}
         />
       )}
@@ -217,40 +196,76 @@ export function Game() {
   )
 }
 
-function CustomBuyIn({ playerId, cents, onCents, onClose, onNext }) {
-  const { dispatch, player } = useStore()
-  const amount = cents ?? 0
+// Two taps instead of one, which is the cost of making the amount explicit.
+// The default is preselected so the common case stays "Rebuy → Rebuy $20".
+function ChooseAmount({ playerId, defaultBuyIn, isRebuy, onClose, onPick }) {
+  const { state, dispatch, player } = useStore()
+  const [amount, setAmount] = useState(defaultBuyIn)
+  const [custom, setCustom] = useState(null)
+
+  const presets = [defaultBuyIn, defaultBuyIn * 2, defaultBuyIn * 3]
+  const chosen = custom != null ? custom : amount
+  const seat = state.game.seats.find((s) => s.playerId === playerId)
+  const spent = seat.buyIns.reduce((sum, b) => sum + b.amount, 0)
+
   return (
     <Sheet
-      title={`Custom amount for ${player(playerId).name}`}
-      hint="For the short buy-in, the odd top-up, or fixing a mis-tap."
+      title={`${isRebuy ? 'Rebuy' : 'Buy in'} · ${player(playerId).name}`}
+      hint={
+        isRebuy
+          ? `In for ${fmt(spent)} so far. They sign for this on the next screen.`
+          : 'First buy-in of the night — no signature needed.'
+      }
       onClose={onClose}
     >
-      <div className="denom" style={{ justifyContent: 'space-between' }}>
-        <div className="who"><div className="nm sm">Buy-in</div></div>
-        <MoneyInput autoFocus cents={cents} onCents={onCents} />
+      <div className="chips">
+        {presets.map((p) => (
+          <button
+            key={p}
+            className="chip num"
+            data-on={custom == null && amount === p}
+            onClick={() => {
+              setAmount(p)
+              setCustom(null)
+            }}
+          >
+            {fmt(p)}
+          </button>
+        ))}
       </div>
+
+      <div className="sec"><span>Or another amount</span></div>
+      <div className="denom" style={{ justifyContent: 'space-between' }}>
+        <div className="who"><div className="nm sm">Custom</div></div>
+        <MoneyInput cents={custom} onCents={setCustom} />
+      </div>
+
       <button
-        className={`btn${amount > 0 ? '' : ' off'}`}
-        style={{ marginTop: 8 }}
-        disabled={amount <= 0}
-        onClick={() => onNext(amount)}
+        className={`btn${chosen > 0 ? '' : ' off'}`}
+        style={{ marginTop: 14 }}
+        disabled={chosen <= 0}
+        onClick={() => onPick(chosen)}
       >
-        {amount > 0 ? `Continue with ${fmt(amount)}` : 'Enter an amount'}
+        {chosen > 0
+          ? `${isRebuy ? 'Rebuy' : 'Buy in'} ${fmt(chosen)}`
+          : 'Pick an amount'}
       </button>
-      <button
-        className="btn ghost danger"
-        onClick={() => {
-          dispatch({
-            type: 'REMOVE_LAST_BUY_IN',
-            playerId,
-            label: { text: `Removed a buy-in for ${player(playerId).name}` },
-          })
-          onClose()
-        }}
-      >
-        Remove last buy-in
-      </button>
+
+      {seat.buyIns.length > 0 && (
+        <button
+          className="btn ghost danger"
+          onClick={() => {
+            dispatch({
+              type: 'REMOVE_LAST_BUY_IN',
+              playerId,
+              label: { text: `Removed a buy-in for ${player(playerId).name}` },
+            })
+            onClose()
+          }}
+        >
+          Remove last buy-in
+        </button>
+      )}
     </Sheet>
   )
 }

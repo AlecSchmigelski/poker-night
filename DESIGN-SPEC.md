@@ -174,12 +174,14 @@ labeled "On the table." Left side: "Tonight" and a quiet hint line.
 | Name | Truncates gracefully; never wraps to two lines. |
 | Sub-line | `3 × $20` — rebuy count at a glance. Reads "No buy-in yet" before the first. |
 | Total in | Right-aligned, tabular figures. |
-| `+` button | ~52×44pt minimum. Accent-filled. The single most-tapped element in the app. |
+| Rebuy button | ~84×46pt, brass. Reads "Buy in" in the quiet rail style until the seat has a buy-in. Opens the amount chooser. |
 
 **Interactions:**
-- Tap `+` → adds one buy-in at the game's default amount. Immediate, no confirm.
-  Fires a light haptic. An undo toast appears: *"Sam +$20 · Undo"*.
-- Long-press `+` → opens a sheet for a custom amount, and offers "remove last buy-in."
+- Tap **Rebuy** → amount chooser (1× / 2× / 3× / custom), then straight to the
+  signature screen if it is a rebuy, or committed immediately if it is the seat's
+  first buy-in. An undo toast appears either way: *"Sam +$20 · Undo"*.
+- The chooser also holds "Remove last buy-in", so fixing a mis-tap is a visible
+  action rather than a hidden gesture.
 - The row itself is not a link. Nothing to accidentally navigate into.
 
 **Secondary actions:** "Add player" and "Game options" as a quiet pair below the list.
@@ -191,10 +193,22 @@ labeled "On the table." Left side: "Tonight" and a quiet hint line.
 - 10+ players (scrolling with the header pinned)
 - Undo toast visible over the bottom action
 
-**Resolved:** the button stays a bare `+`. The amount is stated in the header hint
-("Tap + for a $20 rebuy") and again in every undo toast ("Jo +$20"), so putting it
-on the button costs ~18pt of name width on every row to repeat something already
-said twice.
+**Superseded.** The bare `+` shipped first, then lost to an explicit **Rebuy**
+button that opens an amount chooser.
+
+The `+` optimised for the wrong thing. It was one tap, but it never said what it
+was adding, and a non-default amount was hidden behind a long-press — an
+undiscoverable gesture holding the only route to a short buy-in or a mis-tap fix.
+Rebuys are not uniformly the table stake often enough for that trade to hold.
+
+Now: the button reads **Rebuy** (or **Buy in**, in a quieter style, when the seat
+has nothing yet), and opens a sheet with 1× / 2× / 3× the table buy-in
+preselected at 1×, a custom field, and "Remove last buy-in" for that player. The
+common case is two taps — *Rebuy → Rebuy $20* — and every other case is visible
+rather than hidden.
+
+The cost is real and accepted: the wider button takes room from the name, so long
+names truncate sooner.
 
 ---
 

@@ -39,7 +39,7 @@ export default function App() {
   } else if (!game) {
     body = <NewGame />
   } else if (game.phase === 'playing') {
-    title = ['Tonight', `Tap + for a ${fmt(game.defaultBuyIn)} rebuy`]
+    title = ['Tonight', `${fmt(game.defaultBuyIn)} buy-in · tap Rebuy to top up`]
     right = ['On the table', fmt(potTotal(game))]
     body = <Game />
   } else if (game.phase === 'cashout') {
