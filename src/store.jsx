@@ -25,7 +25,21 @@ function load() {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return empty
-    return { ...empty, ...JSON.parse(raw) }
+    const saved = JSON.parse(raw)
+    if (!saved || typeof saved !== 'object') return empty
+    // Valid JSON of the wrong shape is the dangerous case: it parses, then
+    // explodes on the first .map() during render.
+    const list = (v, fallback) => (Array.isArray(v) ? v : fallback)
+    return {
+      players: list(saved.players, []),
+      groups: list(saved.groups, []),
+      history: list(saved.history, []),
+      chips: list(saved.chips, DEFAULT_CHIPS),
+      game:
+        saved.game && Array.isArray(saved.game.seats)
+          ? { ...saved.game, payments: list(saved.game.payments, []) }
+          : null,
+    }
   } catch {
     return empty
   }

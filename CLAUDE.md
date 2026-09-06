@@ -32,6 +32,18 @@ npm test         # settle math + money parsing (node, no framework)
 Cash games only. Tournaments, blinds, side games, prop bets, multi-device sync, and
 accounts are all explicitly out of scope — see `DESIGN-SPEC.md` §3.
 
+## Failure handling
+
+`Boundary` wraps the whole tree in `main.jsx`. Any render error shows an
+explanation plus Reload and "clear saved data" rather than a black screen — a
+blank page is indistinguishable from "the app didn't load", which is the worst
+possible bug report to receive.
+
+`load()` in the store treats **valid JSON of the wrong shape** as the dangerous
+case: it parses fine, then throws on the first `.map()` during render. Every
+list is coerced with `Array.isArray` before it reaches a component. Keep that
+when adding fields to the persisted state.
+
 ## Visual language
 
 "One lamp over a dark table" — warm blacks, brass as the action colour, clay-chip

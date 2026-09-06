@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { StoreProvider } from './store'
 import App from './App'
 import { Spectator } from './screens/Spectator'
+import { Boundary } from './components/Boundary'
 import './index.css'
 
 // A link with a payload opens the read-only view instead of the app. Nothing
@@ -17,12 +18,14 @@ window.addEventListener('hashchange', () => window.location.reload())
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {shared !== null ? (
-      <Spectator encoded={shared} />
-    ) : (
-      <StoreProvider>
-        <App />
-      </StoreProvider>
-    )}
+    <Boundary>
+      {shared !== null ? (
+        <Spectator encoded={shared} />
+      ) : (
+        <StoreProvider>
+          <App />
+        </StoreProvider>
+      )}
+    </Boundary>
   </StrictMode>,
 )
