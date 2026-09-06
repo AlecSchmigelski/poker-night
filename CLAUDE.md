@@ -34,7 +34,10 @@ accounts are all explicitly out of scope — see `DESIGN-SPEC.md` §3.
 
 ## Hosting
 
-Static build, no backend — see `DEPLOY.md`. `base` is `'./'` and every asset
+Live at <https://alecschmigelski.github.io/poker-night/>, deployed by GitHub
+Actions on every push to `main`. Static build, no backend — see `DEPLOY.md`.
+This project is kept entirely separate from the Arkin work; do not deploy it
+into a shared workspace. `base` is `'./'` and every asset
 reference in `index.html` and the manifest is relative, so one build works at a
 domain root or on a project subpath. Keep it that way: an absolute `/asset` path
 silently breaks GitHub Pages project sites.

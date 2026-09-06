@@ -1,58 +1,60 @@
 # Hosting Poker Night
 
-It is a static site — `npm run build` produces a `dist/` folder of plain files.
-There is no server, no database, and no environment variables to set.
+**Live at <https://alecschmigelski.github.io/poker-night/>**
 
-`base` is `'./'`, so the same build works at a domain root or on a project
-subpath. You do not need to rebuild for a different host.
-
-**HTTPS is not optional.** Add to Home Screen, the share sheet, clipboard copy,
-and haptics are all gated on a secure origin. Every option below gives you HTTPS
-for free. Plain `http://` will silently drop half the app's behaviour.
-
-## Option 1 — Netlify Drop (fastest, no account to start)
+Hosted on GitHub Pages from this repo. `.github/workflows/deploy.yml` installs,
+runs the tests, builds, and publishes on every push to `main` — so shipping is
+just:
 
 ```
-npm run build
+git push
 ```
 
-Then drag the `dist` folder onto <https://app.netlify.com/drop>. You get a URL in
-about ten seconds. Claim it with a free account to keep it and rename it.
+If the tests fail, nothing deploys.
 
-Re-deploying means dragging the new `dist` again.
+## How it is set up
 
-## Option 2 — Vercel (best for repeat deploys)
+- **Repo:** `AlecSchmigelski/poker-night`, public. Pages on the free tier requires
+  a public repo. The app holds no secrets — every byte of data lives in the
+  visitor's own browser.
+- **Pages source:** GitHub Actions (`build_type: workflow`), HTTPS enforced.
+- **No backend.** `npm run build` produces a `dist/` of static files. No server,
+  no database, no environment variables.
+
+## Why `base` is `'./'`
+
+Pages serves this from the `/poker-night/` subpath, not a domain root. Every
+asset reference in `index.html` and the web manifest is relative so the same
+build works either way. **An absolute `/asset` path will 404 here** — if you add
+one, it will look fine locally and break in production.
+
+## HTTPS is not optional
+
+Add to Home Screen, `navigator.share`, clipboard copy, and haptics are all gated
+on a secure origin. Pages gives you HTTPS; a plain `http://` host would silently
+drop half the app's behaviour.
+
+## Checking a deploy
 
 ```
-npm run build
-npx vercel --prod
+gh run list --limit 3
+gh run watch <run-id> --exit-status
 ```
 
-First run asks you to log in and answer a couple of prompts. After that every
-`npx vercel --prod` ships the current build. It auto-detects Vite.
+## Moving hosts later
 
-## Option 3 — GitHub Pages (free, deploys on every push)
+Nothing here is GitHub-specific beyond the workflow. `netlify.toml` is committed
+if you ever want Netlify instead — build `npm run build`, publish `dist`. Any
+static host works, and the relative `base` means no rebuild is needed.
 
-`.github/workflows/deploy.yml` is already set up: it installs, runs the tests,
-builds, and publishes on every push to `main`.
-
-```
-gh repo create poker-night --private --source=. --push
-```
-
-Then in the repo, **Settings → Pages → Source → GitHub Actions**. The site lands
-at `https://<you>.github.io/poker-night/`.
-
-Note the repo is created private above. GitHub Pages on a private repo requires a
-paid plan — use `--public` instead if you are on the free tier and are happy for
-the source to be visible. The app holds no secrets; all data lives in the
-browser.
+Deliberately **not** on Vercel: the only Vercel workspace available on this
+account also holds `arkin-poc`, and this project is kept entirely separate from
+that.
 
 ## After deploying
 
 Open the app on your phone and **Add to Home Screen** — it runs fullscreen with
 its own icon.
 
-The spectator link is built from wherever the app is loaded, so once it is on a
-real domain the `localhost` warning in the share sheet disappears and the links
-work for everyone.
+Spectator links are built from wherever the app is loaded, so they now carry the
+public Pages URL and work for anyone you send them to.
