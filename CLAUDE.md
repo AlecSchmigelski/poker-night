@@ -65,6 +65,14 @@ money**, so never use the accent for a positive number or the up-colour for a
 button. Tokens live at the top of `src/index.css`; the frames they came from are
 `DESIGN-SPEC.md` §10.
 
+## Bomb pots
+
+`game.bombPot` is a timer and nothing else. **It must never write to `buyIns` or
+`cashOut`** — the ante moves chips already on the table, so the pot total and the
+cash-out balance are unchanged by definition. Timer state persists with the game;
+remaining time is always derived from the absolute `nextAt` in `lib/bombpot.js`,
+never decremented, so a sleeping phone cannot drift it.
+
 ## The spectator link
 
 `src/lib/share.js` encodes the table into the URL fragment; `#g=<payload>` boots

@@ -144,6 +144,11 @@ export function renderRecapCanvas(game, player) {
     )
   }
   if (s.loser && s.loser.net < 0) notes.push(`${player(s.loser.playerId).name} funded it`)
+  if (game.bombPot?.count > 0) {
+    notes.push(
+      `${game.bombPot.count} bomb pot${game.bombPot.count === 1 ? '' : 's'} at ${fmt(game.bombPot.ante)} a head`,
+    )
+  }
 
   if (notes.length) {
     const boxY = Math.max(y + 24, H - 232)

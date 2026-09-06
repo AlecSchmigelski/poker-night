@@ -7,6 +7,7 @@ import { ChipSheet } from '../components/ChipSheet'
 import { SignBuyIn } from './SignBuyIn'
 import { BuyInLog } from './BuyInLog'
 import { ShareTable } from './ShareTable'
+import { BombPot } from '../components/BombPot'
 
 export function Game() {
   const { state, dispatch, player } = useStore()
@@ -63,6 +64,12 @@ export function Game() {
   return (
     <>
       <div className="scroll">
+        <BombPot
+          settingsOpen={sheet === 'bomb'}
+          openSettings={() => setSheet('bomb')}
+          onCloseSettings={() => setSheet(null)}
+        />
+
         <div className="list">
           {game.seats.map((seat) => {
             const p = player(seat.playerId)
@@ -185,7 +192,10 @@ export function Game() {
               </div>
             ))}
           </div>
-          <button className="btn ghost" style={{ marginTop: 16 }} onClick={() => setSheet('chips')}>
+          <button className="btn ghost" style={{ marginTop: 16 }} onClick={() => setSheet('bomb')}>
+            {game.bombPot?.on ? 'Bomb pot timer' : 'Start a bomb pot timer'}
+          </button>
+          <button className="btn ghost" onClick={() => setSheet('chips')}>
             Chip breakdown
           </button>
           <button

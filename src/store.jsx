@@ -207,6 +207,11 @@ function reducer(state, action) {
     case 'CANCEL_GAME':
       return { ...state, game: null }
 
+    // The bomb pot lives on the game because it is part of how tonight is being
+    // played. It deliberately never touches seats, buy-ins, or the pot.
+    case 'SET_BOMB_POT':
+      return { ...state, game: { ...state.game, bombPot: action.bombPot } }
+
     case 'SET_CHIPS':
       return { ...state, chips: action.chips }
 

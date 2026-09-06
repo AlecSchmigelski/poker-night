@@ -42,6 +42,7 @@ Explicitly out of scope. Do not design for these.
 | Not building | Why |
 |---|---|
 | Tournaments, blinds, payout structures | Cash game only for v1 |
+| Bomb pots as a *money* event | Antes move chips already on the table; see §13a |
 | Side games, prop bets, high-hand pots | Cut from scope |
 | Hand history, odds, or anything about *playing* poker | This is bookkeeping, not gameplay |
 | Multi-device *sync*, accounts, login | Host's phone is the only writer |
@@ -465,6 +466,34 @@ Cash Out are separate frames.
 functional but unremarkable. The app is used at a table with friends at midnight;
 there may be a warmer or more distinctive direction that does not cost legibility.
 Show me one.
+
+## 13a. Bomb pot timer
+
+A recurring timer that tells the table when to run a bomb pot: everyone antes a
+fixed amount and the flop is dealt with no preflop betting.
+
+**It never touches the money.** The ante comes off stacks that are already on the
+table, so the pot total and the cash-out balance are unchanged by definition. The
+timer writes nothing to `buyIns` and nothing to `cashOut`. Treating a bomb pot as
+a money event would corrupt the one invariant the app exists to protect.
+
+- **Countdown bar** above the seats on the Game screen: next time, ante, and how
+  many have run tonight. Turns brass under a minute. Tap for settings.
+- **When it fires:** a full sheet with the ante at 58px, a chime, and a haptic
+  pattern. Dismissing restarts the clock.
+- **Presets** of 10 / 15 / 20 / 30 minutes, with a settable ante.
+- Off by default; armed from Game options.
+
+Two details that matter more than they look:
+
+- **Remaining time is derived from an absolute `nextAt`, never counted down.** A
+  phone that sleeps suspends timers; recomputing from a timestamp means the
+  countdown is still right when the screen wakes.
+- **After firing it reschedules from now, not from the missed deadline.** A phone
+  asleep through two intervals should prompt once, not queue a burst.
+
+A screen wake lock is held while the timer is armed — a countdown nobody can see
+is useless, and the host puts the phone down between hands.
 
 ## 14a. The spectator link
 
