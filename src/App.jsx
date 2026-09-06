@@ -49,7 +49,7 @@ export default function App() {
       'Tonight',
       gone > 0
         ? `${fmt(potTotal(game))} bought in · ${fmt(gone)} cashed out`
-        : `${fmt(game.defaultBuyIn)} buy-in · tap Rebuy to top up`,
+        : `${fmt(game.defaultBuyIn)} buy-in · tap + to add chips`,
     ]
     right = ['On the table', fmt(inPlay(game))]
     body = <Game />

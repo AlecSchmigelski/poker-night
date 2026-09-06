@@ -175,10 +175,10 @@ labeled "On the table." Left side: "Tonight" and a quiet hint line.
 | Name | Truncates gracefully; never wraps to two lines. |
 | Sub-line | `3 × $20` — rebuy count at a glance. Reads "No buy-in yet" before the first. |
 | Total in | Right-aligned, tabular figures. |
-| Rebuy button | ~84×46pt, brass. Reads "Buy in" in the quiet rail style until the seat has a buy-in. Opens the amount chooser. |
+| `+` button | 56×46pt, brass. Opens the amount chooser. Carries an aria-label naming the player and whether it is a buy-in or a rebuy. |
 
 **Interactions:**
-- Tap **Rebuy** → amount chooser (1× / 2× / 3× / custom), then straight to the
+- Tap **+** → amount chooser (1× / 2× / 3× / custom), then straight to the
   signature screen if it is a rebuy, or committed immediately if it is the seat's
   first buy-in. An undo toast appears either way: *"Sam +$20 · Undo"*.
 - The chooser also holds "Remove last buy-in", so fixing a mis-tap is a visible
@@ -204,14 +204,16 @@ was adding, and a non-default amount was hidden behind a long-press — an
 undiscoverable gesture holding the only route to a short buy-in or a mis-tap fix.
 Rebuys are not uniformly the table stake often enough for that trade to hold.
 
-Now: the button reads **Rebuy** (or **Buy in**, in a quieter style, when the seat
-has nothing yet), and opens a sheet with 1× / 2× / 3× the table buy-in
-preselected at 1×, a custom field, and "Remove last buy-in" for that player. The
-common case is two taps — *Rebuy → Rebuy $20* — and every other case is visible
-rather than hidden.
+Now: the button is a **`+`** that opens a sheet with 1× / 2× / 3× the table
+buy-in preselected at 1×, a custom field, and "Remove last buy-in" for that
+player. The common case is two taps — *+ → Rebuy $20* — and every other case is
+visible rather than hidden.
 
-The cost is real and accepted: the wider button takes room from the name, so long
-names truncate sooner.
+A "Rebuy" text label was tried in between and reverted: it read clearly but cost
+~28pt of name width on every row, and the glyph carries the meaning well enough
+once tapping it opens something that names the player and the amount. The word
+still appears where there is room for it — in the chooser's title and primary
+button, and in the player actions sheet.
 
 ---
 

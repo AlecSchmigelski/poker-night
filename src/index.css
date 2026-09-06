@@ -223,27 +223,6 @@ input { -webkit-appearance: none; }
 }
 .plus:active { transform: scale(0.93); box-shadow: none; filter: brightness(0.92); }
 
-/* Text button in the thumb's sweep. Wider than the old bare "+", which costs
-   name width — names truncate, which is the cheaper loss. */
-.rebuy {
-  flex: 0 0 auto;
-  min-width: 84px;
-  height: 46px;
-  padding: 0 14px;
-  border-radius: 13px;
-  background: var(--brass);
-  color: var(--brass-ink);
-  display: grid;
-  place-items: center;
-  font-size: 15px;
-  font-weight: 660;
-  letter-spacing: -0.015em;
-  line-height: 1;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset, 0 3px 12px -3px rgba(233, 161, 59, 0.5);
-  transition: transform 0.06s ease, filter 0.06s ease;
-}
-.rebuy:active { transform: scale(0.95); box-shadow: none; filter: brightness(0.92); }
-.rebuy.first { background: var(--rail); color: var(--chalk); border: 1px solid var(--hairline); box-shadow: none; }
 
 /* ---------- selectable ---------- */
 

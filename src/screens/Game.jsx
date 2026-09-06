@@ -91,14 +91,14 @@ export function Game() {
                   <>
                     <div className={`amt num${total === 0 ? ' zero' : ''}`}>{fmt(total)}</div>
                     <button
-                      className={`rebuy${seat.buyIns.length ? '' : ' first'}`}
+                      className="plus"
                       aria-label={`${seat.buyIns.length ? 'Rebuy' : 'Buy in'} for ${p.name}`}
                       onClick={(e) => {
                         e.stopPropagation()
                         setChoosing(seat.playerId)
                       }}
                     >
-                      {seat.buyIns.length ? 'Rebuy' : 'Buy in'}
+                      +
                     </button>
                   </>
                 )}
