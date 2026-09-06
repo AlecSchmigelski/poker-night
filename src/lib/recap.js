@@ -1,5 +1,5 @@
-import { fmt, fmtSigned } from './money'
-import { nets, potTotal } from './settle'
+import { fmt, fmtSigned } from './money.js'
+import { nets, potTotal } from './settle.js'
 
 // The superlatives that make a night worth sharing.
 export function recapStats(game, player) {
@@ -45,7 +45,7 @@ const MAX_ROWS = 10
 // wide in a group chat. The card grows taller with the field rather than
 // shrinking the type to fit a fixed frame — a squeezed row is unreadable at
 // thumbnail size, and a tall image just scrolls.
-export function renderRecapCanvas(game, player) {
+export function renderRecapCanvas(game, player, makeCanvas) {
   const s = recapStats(game, player)
   const notes = superlatives(game, s, player)
   const shown = s.ranked.slice(0, MAX_ROWS)
@@ -55,9 +55,15 @@ export function renderRecapCanvas(game, player) {
   const footer = (notes.length ? notes.length * 54 + 40 : 0) + (hidden ? 54 : 0)
   const H = top + shown.length * ROW + footer + 76
 
-  const c = document.createElement('canvas')
-  c.width = W
-  c.height = H
+  // makeCanvas lets this run outside a browser (sample generation, tests).
+  let c
+  if (makeCanvas) {
+    c = makeCanvas(W, H)
+  } else {
+    c = document.createElement('canvas')
+    c.width = W
+    c.height = H
+  }
   const g = c.getContext('2d')
   const font = (size, weight = 400) =>
     `${weight} ${size}px ui-sans-serif, -apple-system, "SF Pro Text", "Segoe UI", Inter, sans-serif`
@@ -76,9 +82,7 @@ export function renderRecapCanvas(game, player) {
 
   g.fillStyle = '#E9A13B'
   g.font = font(34, 640)
-  g.letterSpacing = '9px'
-  g.fillText('POKER NIGHT', M, 150)
-  g.letterSpacing = '0px'
+  tracked(g, 'POKER NIGHT', M, 150, 9)
 
   // The date is the headline. Shrink to fit rather than truncate a weekday.
   const date = s.date.toLocaleDateString(undefined, {
@@ -190,6 +194,16 @@ function superlatives(game, s, player) {
     )
   }
   return out.slice(0, 2)
+}
+
+// ctx.letterSpacing is recent and not everywhere. Drawing per character keeps
+// the wordmark identical wherever the card is rendered.
+function tracked(g, text, x, y, spacing) {
+  let cx = x
+  for (const ch of text) {
+    g.fillText(ch, cx, y)
+    cx += g.measureText(ch).width + spacing
+  }
 }
 
 function initials(name) {

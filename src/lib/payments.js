@@ -1,4 +1,4 @@
-import { fromCents } from './money'
+import { fromCents } from './money.js'
 
 // Venmo and Cash App have no peer-to-peer API. These are deep links that
 // prefill their compose screen; the payer still confirms in their own app and
