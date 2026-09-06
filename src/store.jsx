@@ -169,7 +169,16 @@ function reducer(state, action) {
         game: {
           ...state.game,
           seats: state.game.seats.map((s) =>
-            s.playerId === action.playerId ? { ...s, cashOut: action.amount } : s,
+            s.playerId === action.playerId
+              ? {
+                  ...s,
+                  cashOut: action.amount,
+                  // Marks someone who left mid-game, so the end-of-night count
+                  // shows their number as already settled rather than asking
+                  // the host to count a stack that is no longer there.
+                  leftEarly: action.amount == null ? false : (action.leftEarly ?? s.leftEarly ?? false),
+                }
+              : s,
           ),
         },
       }
@@ -225,7 +234,7 @@ function reducer(state, action) {
 
 // Actions that change money get one level of undo, surfaced as a toast.
 const UNDOABLE = new Set([
-  'BUY_IN', 'REMOVE_LAST_BUY_IN', 'REMOVE_SEAT', 'FINISH_GAME',
+  'BUY_IN', 'REMOVE_LAST_BUY_IN', 'REMOVE_SEAT', 'FINISH_GAME', 'SET_CASH_OUT',
   'CANCEL_GAME', 'DELETE_PLAYER', 'DELETE_GROUP', 'DELETE_HISTORY',
 ])
 

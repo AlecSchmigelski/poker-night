@@ -1,5 +1,5 @@
 import { useStore } from '../store'
-import { fmt } from '../lib/money'
+import { fmt, fmtSigned } from '../lib/money'
 import { countedTotal, potTotal } from '../lib/settle'
 import { Avatar, Dock, MoneyInput } from '../components/UI'
 
@@ -9,9 +9,10 @@ export function CashOut() {
   const pot = potTotal(game)
   const counted = countedTotal(game)
   const diff = counted - pot
-  const entered = game.seats.filter((s) => s.cashOut != null).length
-  const allEntered = entered === game.seats.length
-  const remaining = game.seats.length - entered
+  const toCount = game.seats.filter((s) => !s.leftEarly)
+  const entered = toCount.filter((s) => s.cashOut != null).length
+  const allEntered = entered === toCount.length
+  const remaining = toCount.length - entered
 
   // Red is reserved for "you say you are done and you are not." While stacks
   // are still outstanding the bar stays quiet.
@@ -37,7 +38,7 @@ export function CashOut() {
           </div>
           <div className="badge num">
             {!allEntered
-              ? `${entered} of ${game.seats.length}`
+              ? `${entered} of ${toCount.length}`
               : diff === 0
                 ? 'balanced'
                 : `${diff > 0 ? 'over' : 'short'} ${fmt(Math.abs(diff))}`}
@@ -48,6 +49,24 @@ export function CashOut() {
           {game.seats.map((seat) => {
             const p = player(seat.playerId)
             const total = seat.buyIns.reduce((s, b) => s + b.amount, 0)
+            // Someone who left mid-game is already counted; showing an input
+            // would invite the host to re-count chips that walked out the door.
+            if (seat.leftEarly) {
+              const net = seat.cashOut - total
+              return (
+                <div key={seat.playerId} className="row compact" data-out="true">
+                  <Avatar player={p} size={30} />
+                  <div className="who">
+                    <div className="nm sm">{p.name}</div>
+                    <div className="meta num">in {fmt(total)} · out {fmt(seat.cashOut)}</div>
+                  </div>
+                  <div className={`amt num ${net > 0 ? 'up' : net < 0 ? 'down' : 'flat'}`}>
+                    {fmtSigned(net)}
+                  </div>
+                  <span className="out-tag">Left early</span>
+                </div>
+              )
+            }
             return (
               <div key={seat.playerId} className="row compact">
                 <Avatar player={p} size={30} />

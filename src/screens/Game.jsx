@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../store'
-import { fmt } from '../lib/money'
-import { potTotal } from '../lib/settle'
+import { fmt, fmtSigned } from '../lib/money'
+import { inPlay, potTotal } from '../lib/settle'
 import { Avatar, Dock, MoneyInput, Sheet } from '../components/UI'
 import { ChipSheet } from '../components/ChipSheet'
 import { SignBuyIn } from './SignBuyIn'
@@ -16,6 +16,8 @@ export function Game() {
   // The seat whose amount is being chosen, then the buy-in waiting on a signature.
   const [choosing, setChoosing] = useState(null)
   const [pending, setPending] = useState(null)
+  const [acting, setActing] = useState(null)
+  const [cashingOut, setCashingOut] = useState(null)
 
   const seated = new Set(game.seats.map((s) => s.playerId))
   const bench = state.players.filter((p) => !seated.has(p.id))
@@ -55,26 +57,52 @@ export function Game() {
           {game.seats.map((seat) => {
             const p = player(seat.playerId)
             const total = seat.buyIns.reduce((s, b) => s + b.amount, 0)
+            const out = seat.cashOut != null
             return (
-              <div key={seat.playerId} className="row">
+              <button
+                key={seat.playerId}
+                className="row"
+                data-out={out}
+                onClick={() => setActing(seat.playerId)}
+              >
                 <Avatar player={p} />
                 <div className="who">
                   <div className="nm">{p.name}</div>
                   <div className="meta">
-                    {seat.buyIns.length === 0
-                      ? 'No buy-in yet'
-                      : `${seat.buyIns.length} × ${fmt(game.defaultBuyIn)}`}
+                    {out
+                      ? `in ${fmt(total)} · out ${fmt(seat.cashOut)}`
+                      : seat.buyIns.length === 0
+                        ? 'No buy-in yet'
+                        : `${seat.buyIns.length} × ${fmt(game.defaultBuyIn)}`}
                   </div>
                 </div>
-                <div className={`amt num${total === 0 ? ' zero' : ''}`}>{fmt(total)}</div>
-                <button
-                  className={`rebuy${seat.buyIns.length ? '' : ' first'}`}
-                  aria-label={`${seat.buyIns.length ? 'Rebuy' : 'Buy in'} for ${p.name}`}
-                  onClick={() => setChoosing(seat.playerId)}
-                >
-                  {seat.buyIns.length ? 'Rebuy' : 'Buy in'}
-                </button>
-              </div>
+                {out ? (
+                  <>
+                    <div
+                      className={`amt num ${
+                        seat.cashOut - total > 0 ? 'up' : seat.cashOut - total < 0 ? 'down' : 'flat'
+                      }`}
+                    >
+                      {fmtSigned(seat.cashOut - total)}
+                    </div>
+                    <span className="out-tag">Cashed out</span>
+                  </>
+                ) : (
+                  <>
+                    <div className={`amt num${total === 0 ? ' zero' : ''}`}>{fmt(total)}</div>
+                    <button
+                      className={`rebuy${seat.buyIns.length ? '' : ' first'}`}
+                      aria-label={`${seat.buyIns.length ? 'Rebuy' : 'Buy in'} for ${p.name}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setChoosing(seat.playerId)
+                      }}
+                    >
+                      {seat.buyIns.length ? 'Rebuy' : 'Buy in'}
+                    </button>
+                  </>
+                )}
+              </button>
             )
           })}
         </div>
@@ -95,7 +123,7 @@ export function Game() {
           disabled={potTotal(game) === 0}
           onClick={() => dispatch({ type: 'SET_PHASE', phase: 'cashout' })}
         >
-          {potTotal(game) === 0 ? 'Nobody has bought in' : 'Cash out'}
+          {potTotal(game) === 0 ? 'Nobody has bought in' : 'End the game'}
         </button>
       </Dock>
 
@@ -134,6 +162,25 @@ export function Game() {
             </div>
           )}
         </Sheet>
+      )}
+
+      {acting && (
+        <PlayerActions
+          playerId={acting}
+          onClose={() => setActing(null)}
+          onRebuy={() => {
+            setChoosing(acting)
+            setActing(null)
+          }}
+          onCashOut={() => {
+            setCashingOut(acting)
+            setActing(null)
+          }}
+        />
+      )}
+
+      {cashingOut && (
+        <CashOutOne playerId={cashingOut} onClose={() => setCashingOut(null)} />
       )}
 
       {choosing && (
@@ -266,6 +313,124 @@ function ChooseAmount({ playerId, defaultBuyIn, isRebuy, onClose, onPick }) {
           Remove last buy-in
         </button>
       )}
+    </Sheet>
+  )
+}
+
+// Per-player actions. The row became tappable when cashing one person out
+// arrived: two actions per seat will not fit side by side at 390pt, and burying
+// the second one in a gesture is what the Rebuy change just undid.
+function PlayerActions({ playerId, onClose, onRebuy, onCashOut }) {
+  const { state, dispatch, player } = useStore()
+  const seat = state.game.seats.find((s) => s.playerId === playerId)
+  const p = player(playerId)
+  const total = seat.buyIns.reduce((sum, b) => sum + b.amount, 0)
+  const out = seat.cashOut != null
+  const net = out ? seat.cashOut - total : 0
+
+  return (
+    <Sheet
+      title={p.name}
+      hint={out ? 'Already cashed out and away from the table.' : `In for ${fmt(total)}.`}
+      onClose={onClose}
+    >
+      {out ? (
+        <>
+          <div className="result-line">
+            <span>in {fmt(total)} · out {fmt(seat.cashOut)}</span>
+            <span className={`big num ${net > 0 ? 'up' : net < 0 ? 'down' : 'flat'}`}>
+              {fmtSigned(net)}
+            </span>
+          </div>
+          <button
+            className="btn ghost"
+            onClick={() => {
+              // Sitting back down reopens the seat; their stack goes back into
+              // the count and they can buy in again.
+              dispatch({ type: 'SET_CASH_OUT', playerId, amount: null })
+              onClose()
+            }}
+          >
+            Sit back down
+          </button>
+        </>
+      ) : (
+        <>
+          <button className="btn" onClick={onRebuy}>
+            {seat.buyIns.length ? 'Rebuy' : 'Buy in'}
+          </button>
+          <button className="btn ghost" disabled={total === 0} onClick={onCashOut}>
+            Cash out {p.name}
+          </button>
+          <button
+            className="btn ghost danger"
+            onClick={() => {
+              dispatch({
+                type: 'REMOVE_SEAT',
+                playerId,
+                label: { text: `Removed ${p.name}` },
+              })
+              onClose()
+            }}
+          >
+            Remove from the table
+          </button>
+        </>
+      )}
+    </Sheet>
+  )
+}
+
+// Cashing one player out mid-game. Their chips leave the table, so the pot the
+// host still has to count shrinks — but the settle maths needs no special case,
+// because their number is recorded the same way as everyone else's at the end.
+function CashOutOne({ playerId, onClose }) {
+  const { state, dispatch, player } = useStore()
+  const seat = state.game.seats.find((s) => s.playerId === playerId)
+  const p = player(playerId)
+  const total = seat.buyIns.reduce((sum, b) => sum + b.amount, 0)
+  const [stack, setStack] = useState(null)
+  const net = (stack ?? 0) - total
+
+  return (
+    <Sheet
+      title={`Cash out ${p.name}`}
+      hint="Count their stack. Everyone else keeps playing."
+      onClose={onClose}
+    >
+      <div className="denom" style={{ justifyContent: 'space-between' }}>
+        <div className="who">
+          <div className="nm sm">Final stack</div>
+          <div className="meta num">in {fmt(total)}</div>
+        </div>
+        <MoneyInput autoFocus cents={stack} onCents={setStack} />
+      </div>
+
+      {stack != null && (
+        <div className="result-line" style={{ marginTop: 4 }}>
+          <span>Walks away</span>
+          <span className={`big num ${net > 0 ? 'up' : net < 0 ? 'down' : 'flat'}`}>
+            {fmtSigned(net)}
+          </span>
+        </div>
+      )}
+
+      <button
+        className={`btn${stack == null ? ' off' : ''}`}
+        disabled={stack == null}
+        onClick={() => {
+          dispatch({
+            type: 'SET_CASH_OUT',
+            playerId,
+            amount: stack,
+            leftEarly: true,
+            label: { text: `${p.name} cashed out`, amount: fmtSigned(net) },
+          })
+          onClose()
+        }}
+      >
+        {stack == null ? 'Enter their stack' : `Cash out ${fmt(stack)}`}
+      </button>
     </Sheet>
   )
 }

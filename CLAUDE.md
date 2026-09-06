@@ -65,6 +65,17 @@ money**, so never use the accent for a positive number or the up-colour for a
 button. Tokens live at the top of `src/index.css`; the frames they came from are
 `DESIGN-SPEC.md` §10.
 
+## Leaving early
+
+A seat with `cashOut` set during the `playing` phase is someone who left early;
+`leftEarly` marks it. The end-of-night count **must** skip those seats — they are
+already counted, and showing an input invites the host to re-count chips that are
+no longer in the room.
+
+`inPlay()` (buy-ins minus everything cashed out) is what the header shows during
+play; `potTotal()` is still the figure the whole night must reconcile to. Do not
+conflate them. The settle maths needs no special case for early leavers.
+
 ## Bomb pots
 
 `game.bombPot` is a timer and nothing else. **It must never write to `buyIns` or

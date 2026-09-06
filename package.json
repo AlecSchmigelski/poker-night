@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node test/settle.test.mjs && node test/chips.test.mjs && node test/share.test.mjs && node test/bombpot.test.mjs"
+    "test": "node test/settle.test.mjs && node test/chips.test.mjs && node test/share.test.mjs && node test/bombpot.test.mjs && node test/earlycashout.test.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",

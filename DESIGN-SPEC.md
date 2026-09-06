@@ -184,8 +184,10 @@ labeled "On the table." Left side: "Tonight" and a quiet hint line.
   action rather than a hidden gesture.
 - The row itself is not a link. Nothing to accidentally navigate into.
 
-**Secondary actions:** "Add player" and "Game options" as a quiet pair below the list.
-**Primary action:** "Cash out," bottom, full width. Disabled until the pot is non-zero.
+**Secondary actions:** a quiet 2×2 of Share the table, Buy-in log, Add player, Options.
+**Primary action:** "End the game," bottom, full width. Disabled until the pot is
+non-zero. It is deliberately *not* called Cash out — cashing out is now a
+per-player action and the two must not read as the same thing.
 
 **States to design:**
 - Fresh game, nobody has bought in yet (all rows at $0)
@@ -480,6 +482,35 @@ Cash Out are separate frames.
 functional but unremarkable. The app is used at a table with friends at midnight;
 there may be a warmer or more distinctive direction that does not cost legibility.
 Show me one.
+
+## 12a. Leaving early
+
+Anyone can be cashed out on their own, mid-game, without ending the night.
+
+Tap a player's row for their actions: Rebuy, Cash out, or Remove from the table.
+Cashing out asks for their final stack, shows what they walk away with, and marks
+the seat done. Their row dims to their net with a **Cashed out** tag, and
+**Sit back down** reverses it if they buy back in.
+
+Two consequences the design has to carry honestly:
+
+- **"On the table" now means chips actually in front of people** — total buy-ins
+  minus anything already walked out the door. When someone has left, the header
+  sub-line spells out both numbers (`$140 bought in · $50 cashed out`), because
+  the pot the host must eventually account for is still the larger one.
+- **The end-of-night count skips them.** A seat marked `leftEarly` shows as a
+  locked row reading **Left early** with its result, not an input. Asking the
+  host to count a stack that is no longer in the room is how you get a phantom
+  discrepancy at 1am.
+
+The settle maths needs no special case: their number was recorded the same way
+everyone else's is, so nets still sum to zero and they appear in the payment list
+like anyone else.
+
+**Why the row became tappable**, reversing "the row is not a link" in §8.2: a
+seat now has two actions, and two buttons do not fit at 390pt. Burying the second
+one in a long-press is exactly what the Rebuy change removed. The Rebuy button
+stays on the row as the fast path and stops propagation.
 
 ## 13a. Bomb pot timer
 

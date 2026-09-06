@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from './store'
 import { fmt } from './lib/money'
-import { countedTotal, potTotal } from './lib/settle'
+import { countedTotal, inPlay, potTotal } from './lib/settle'
 import { NewGame } from './screens/NewGame'
 import { Game } from './screens/Game'
 import { CashOut } from './screens/CashOut'
@@ -39,8 +39,14 @@ export default function App() {
   } else if (!game) {
     body = <NewGame />
   } else if (game.phase === 'playing') {
-    title = ['Tonight', `${fmt(game.defaultBuyIn)} buy-in · tap Rebuy to top up`]
-    right = ['On the table', fmt(potTotal(game))]
+    const gone = potTotal(game) - inPlay(game)
+    title = [
+      'Tonight',
+      gone > 0
+        ? `${fmt(potTotal(game))} bought in · ${fmt(gone)} cashed out`
+        : `${fmt(game.defaultBuyIn)} buy-in · tap Rebuy to top up`,
+    ]
+    right = ['On the table', fmt(inPlay(game))]
     body = <Game />
   } else if (game.phase === 'cashout') {
     const balanced =

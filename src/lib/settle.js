@@ -48,3 +48,15 @@ export function minimizePayments(netList) {
 
   return payments
 }
+
+// Chips physically still on the table: everything bought in, minus anything a
+// player already walked out with. A seat with a cashOut during play is someone
+// who left early — the settle maths needs no special case, because their number
+// is already counted, but the host is counting a smaller pile.
+export function inPlay(game) {
+  return potTotal(game) - countedTotal(game)
+}
+
+export function stillIn(game) {
+  return game.seats.filter((s) => s.cashOut == null)
+}
