@@ -82,10 +82,11 @@ Explicitly out of scope. Do not design for these.
 
 ## 6. Information architecture
 
-Three tabs, persistent bottom navigation.
+Four tabs, persistent bottom navigation. **Home is the landing tab.**
 
 ```
-┌─ Game ──────── the active night, or setup if none
+┌─ Home ──────── the state of things, and the only view of unpaid debts
+├─ Game ──────── the active night, or setup if none
 │    ├─ New Game        (no game running)
 │    ├─ Live Game       (phase: playing)
 │    ├─ Cash Out        (phase: cashout)
@@ -482,6 +483,27 @@ Cash Out are separate frames.
 functional but unremarkable. The app is used at a table with friends at midnight;
 there may be a warmer or more distinctive direction that does not cost legibility.
 Show me one.
+
+## 11a. Home
+
+The landing tab. It exists because of one gap, not to be a dashboard: **once a
+night is saved, its unpaid payments become invisible.** The Ledger shows net
+position over time, which is a different question from "who still has to hand me
+cash." Nothing else in the app could answer that.
+
+- **The hero** carries whichever state you are in. Mid-game: chips in play,
+  total bought in, how many are still playing, elapsed time, buy-in, and the bomb
+  pot countdown, with one button back to the table. Between games: a short
+  prompt and "Start a night."
+- **Still owed** lists every unpaid payment across saved nights, newest first,
+  with the total in the section header and a one-tap **Paid** on each row. This
+  is the reason the tab exists.
+- **All time** shows the top five, linking through to the full Ledger.
+- **Last night** opens that night's recap card.
+
+Everything below the hero is conditional. A first-time user with no history sees
+the hero and nothing else — the hub must not present a wall of empty sections
+pretending to be data.
 
 ## 12a. Leaving early
 

@@ -224,6 +224,23 @@ function reducer(state, action) {
     case 'SET_CHIPS':
       return { ...state, chips: action.chips }
 
+    // Debts outlive the night they came from, so paid state has to be editable
+    // after a game is archived.
+    case 'TOGGLE_HISTORY_PAID':
+      return {
+        ...state,
+        history: state.history.map((g) =>
+          g.id !== action.gameId
+            ? g
+            : {
+                ...g,
+                payments: g.payments.map((p) =>
+                  p.id === action.paymentId ? { ...p, paid: !p.paid } : p,
+                ),
+              },
+        ),
+      }
+
     case 'DELETE_HISTORY':
       return { ...state, history: state.history.filter((g) => g.id !== action.id) }
 

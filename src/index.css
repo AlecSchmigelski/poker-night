@@ -815,3 +815,83 @@ input { -webkit-appearance: none; }
   font-size: 15px;
 }
 .result-line .big { font-size: 21px; font-weight: 680; letter-spacing: -0.02em; }
+
+/* ---------- home hub ---------- */
+
+.hub-hero {
+  background: var(--felt);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  padding: 18px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.hub-hero .glow {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 420px;
+  height: 260px;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, rgba(233, 161, 59, 0.16), transparent 68%);
+}
+.hub-hero .inner { position: relative; }
+.hub-hero .eyebrow {
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brass);
+  font-weight: 640;
+}
+.hub-hero .big {
+  font-size: 42px;
+  font-weight: 680;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.hub-hero .line { font-size: 13.5px; color: var(--smoke); margin-top: 8px; line-height: 1.5; }
+.hub-hero .btn { margin-top: 16px; }
+
+.hub-stats { display: flex; gap: 8px; margin-top: 14px; }
+.hub-stats .cell {
+  flex: 1;
+  background: var(--rail);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-ctl);
+  padding: 10px 11px;
+}
+.hub-stats .k { font-size: 11px; color: var(--smoke); }
+.hub-stats .v {
+  font-size: 16px;
+  font-weight: 640;
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.owed {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.owed:last-child { border-bottom: none; }
+.owed .names { flex: 1; min-width: 0; font-size: 14.5px; line-height: 1.35; }
+.owed .names b { font-weight: 620; }
+.owed .names em { font-style: normal; color: var(--smoke); font-weight: 500; }
+.owed .when { font-size: 12px; color: var(--smoke); margin-top: 2px; }
+.owed .settle {
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--rail);
+  border: 1px solid var(--hairline);
+  color: var(--chalk);
+}

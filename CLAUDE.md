@@ -65,6 +65,14 @@ money**, so never use the accent for a positive number or the up-colour for a
 button. Tokens live at the top of `src/index.css`; the frames they came from are
 `DESIGN-SPEC.md` §10.
 
+## Home
+
+The landing tab exists for one reason: unpaid payments vanish into `history` when
+a night is saved, and nothing else surfaces them. `lib/debts.js` reads them back
+out; `TOGGLE_HISTORY_PAID` settles one after the fact. Keep every section below
+the hero conditional — an empty hub should show the hero alone, not a grid of
+zeroes.
+
 ## Leaving early
 
 A seat with `cashOut` set during the `playing` phase is someone who left early;

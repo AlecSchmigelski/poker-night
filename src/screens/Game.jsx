@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../store'
 import { fmt, fmtSigned } from '../lib/money'
-import { inPlay, potTotal } from '../lib/settle'
+import { potTotal } from '../lib/settle'
 import { Avatar, Dock, MoneyInput, Sheet } from '../components/UI'
 import { ChipSheet } from '../components/ChipSheet'
 import { SignBuyIn } from './SignBuyIn'

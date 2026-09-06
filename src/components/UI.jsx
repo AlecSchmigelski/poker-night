@@ -66,6 +66,7 @@ const PATHS = {
     </>
   ),
   ledger: <path d="M4 6h16M4 12h16M4 18h10" />,
+  home: <path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z" />,
 }
 
 export function Icon({ name }) {

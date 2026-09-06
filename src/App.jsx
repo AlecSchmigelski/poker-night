@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useStore } from './store'
 import { fmt } from './lib/money'
 import { countedTotal, inPlay, potTotal } from './lib/settle'
+import { Home } from './screens/Home'
 import { NewGame } from './screens/NewGame'
 import { Game } from './screens/Game'
 import { CashOut } from './screens/CashOut'
@@ -12,6 +13,7 @@ import { Toast } from './components/Toast'
 import { Icon } from './components/UI'
 
 const TABS = [
+  ['home', 'Home'],
   ['game', 'Game'],
   ['players', 'Players'],
   ['ledger', 'Ledger'],
@@ -19,7 +21,7 @@ const TABS = [
 
 export default function App() {
   const { state } = useStore()
-  const [tab, setTab] = useState('game')
+  const [tab, setTab] = useState('home')
   const game = state.game
 
   // The header is the one persistent thing across the three game phases. The
@@ -29,7 +31,10 @@ export default function App() {
   let tone = null
   let body
 
-  if (tab === 'players') {
+  if (tab === 'home') {
+    title = ['Poker Night', game ? 'A game is running' : homeHint(state)]
+    body = <Home onGo={setTab} />
+  } else if (tab === 'players') {
     const missing = state.players.filter((p) => !p.venmo && !p.cashapp).length
     title = ['Players', missing ? 'Handles make settling one tap' : 'Roster and groups']
     body = <Players />
@@ -100,6 +105,11 @@ export default function App() {
       <div id="sheet-slot" />
     </div>
   )
+}
+
+function homeHint(state) {
+  if (state.history.length === 0) return 'Your table, start to finish'
+  return `${state.history.length} night${state.history.length === 1 ? '' : 's'} on the books`
 }
 
 function ledgerHint(history) {
