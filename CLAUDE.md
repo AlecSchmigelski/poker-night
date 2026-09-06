@@ -32,6 +32,16 @@ npm test         # settle math + money parsing (node, no framework)
 Cash games only. Tournaments, blinds, side games, prop bets, multi-device sync, and
 accounts are all explicitly out of scope — see `DESIGN-SPEC.md` §3.
 
+## Hosting
+
+Static build, no backend — see `DEPLOY.md`. `base` is `'./'` and every asset
+reference in `index.html` and the manifest is relative, so one build works at a
+domain root or on a project subpath. Keep it that way: an absolute `/asset` path
+silently breaks GitHub Pages project sites.
+
+HTTPS is required in practice — Add to Home Screen, `navigator.share`, clipboard
+copy, and haptics are all secure-origin gated.
+
 ## Failure handling
 
 `Boundary` wraps the whole tree in `main.jsx`. Any render error shows an

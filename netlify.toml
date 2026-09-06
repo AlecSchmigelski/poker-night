@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Single page app: every path serves index.html. The spectator link lives in the
+# URL fragment, which never reaches the server, so nothing else is needed.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
