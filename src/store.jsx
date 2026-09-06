@@ -29,7 +29,8 @@ function reducer(state, action) {
   switch (action.type) {
     case 'ADD_PLAYER': {
       const player = {
-        id: uid(),
+        // The caller may pass an id so it can select the new player right away.
+        id: action.id || uid(),
         name: action.name.trim(),
         color: COLORS[state.players.length % COLORS.length],
         venmo: '',
@@ -54,6 +55,10 @@ function reducer(state, action) {
           ...g,
           playerIds: g.playerIds.filter((id) => id !== action.id),
         })),
+        // An orphaned seat would show up as "Unknown" all night; drop it too.
+        game: state.game
+          ? { ...state.game, seats: state.game.seats.filter((s) => s.playerId !== action.id) }
+          : null,
       }
 
     case 'SAVE_GROUP': {

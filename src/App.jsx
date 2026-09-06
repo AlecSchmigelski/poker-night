@@ -9,12 +9,21 @@ import { Settle } from './screens/Settle'
 import { Players } from './screens/Players'
 import { Ledger } from './screens/Ledger'
 import { Toast } from './components/Toast'
+import { Icon } from './components/UI'
 
-const TITLES = {
+// The header is the one persistent thing across the three game phases — the
+// content swaps underneath it, there is no page transition (§12).
+const PHASES = {
   playing: ['Tonight', 'Tap + for a rebuy'],
   cashout: ['Cash out', 'Count every stack'],
   settle: ['Settle up', 'Fewest possible payments'],
 }
+
+const TABS = [
+  ['game', 'Game'],
+  ['players', 'Players'],
+  ['ledger', 'Ledger'],
+]
 
 export default function App() {
   const { state } = useStore()
@@ -26,23 +35,24 @@ export default function App() {
   let pot = null
 
   if (tab === 'players') {
-    body = <Players />
     title = ['Players', 'Roster and groups']
+    body = <Players />
   } else if (tab === 'ledger') {
-    body = <Ledger />
     title = ['Ledger', 'Lifetime standings']
+    body = <Ledger />
   } else if (!game) {
     body = <NewGame />
   } else {
-    title = TITLES[game.phase]
+    title = PHASES[game.phase]
     pot = potTotal(game)
-    body = game.phase === 'playing' ? <Game /> : game.phase === 'cashout' ? <CashOut /> : <Settle />
+    body =
+      game.phase === 'playing' ? <Game /> : game.phase === 'cashout' ? <CashOut /> : <Settle />
   }
 
   return (
     <div className="app">
       <header className="topbar">
-        <div>
+        <div className="info">
           <h1>{title[0]}</h1>
           <div className="sub">{title[1]}</div>
         </div>
@@ -56,22 +66,23 @@ export default function App() {
 
       {body}
 
-      <nav className="tabbar">
-        <button data-active={tab === 'game'} onClick={() => setTab('game')}>
-          <span className="glyph">♠</span>
-          Game
-        </button>
-        <button data-active={tab === 'players'} onClick={() => setTab('players')}>
-          <span className="glyph">♣</span>
-          Players
-        </button>
-        <button data-active={tab === 'ledger'} onClick={() => setTab('ledger')}>
-          <span className="glyph">♦</span>
-          Ledger
-        </button>
-      </nav>
-
-      <Toast />
+      <div className="dock">
+        {/* Screens portal their primary action here, above the tab bar. */}
+        <div id="dock-slot" />
+        <Toast />
+        <nav className="tabbar">
+          {TABS.map(([id, label]) => (
+            <button
+              key={id}
+              aria-current={tab === id ? 'page' : undefined}
+              onClick={() => setTab(id)}
+            >
+              <Icon name={id} />
+              {label}
+            </button>
+          ))}
+        </nav>
+      </div>
     </div>
   )
 }

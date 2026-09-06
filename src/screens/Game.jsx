@@ -1,28 +1,110 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../store'
 import { fmt, toCents } from '../lib/money'
 import { potTotal } from '../lib/settle'
-import { Avatar, Sheet } from '../components/UI'
+import { uid } from '../lib/id'
+import { Avatar, Dock, Sheet } from '../components/UI'
+
+function buzz(ms = 8) {
+  if (navigator.vibrate) navigator.vibrate(ms)
+}
 
 function elapsed(since) {
-  const mins = Math.floor((Date.now() - since) / 60000)
-  if (mins < 60) return `${mins}m`
+  const mins = Math.max(0, Math.floor((Date.now() - since) / 60000))
+  if (mins < 60) return `${mins} min`
   return `${Math.floor(mins / 60)}h ${mins % 60}m`
+}
+
+// The clock in the footer hint would otherwise freeze until the next rebuy.
+function useMinuteTick() {
+  const [, force] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => force((n) => n + 1), 30000)
+    return () => clearInterval(t)
+  }, [])
+}
+
+// The most-tapped element in the app. Tap adds the default buy-in with no
+// confirmation; a 450ms hold opens the custom sheet instead and suppresses the
+// tap that would otherwise follow it.
+function BuyButton({ label, onTap, onHold }) {
+  const timer = useRef(null)
+  const held = useRef(false)
+  const [pressing, setPressing] = useState(false)
+
+  const start = () => {
+    held.current = false
+    setPressing(true)
+    timer.current = setTimeout(() => {
+      held.current = true
+      setPressing(false)
+      buzz(14)
+      onHold()
+    }, 450)
+  }
+  const stop = () => {
+    clearTimeout(timer.current)
+    setPressing(false)
+  }
+
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  return (
+    <button
+      className={`buy-btn num${pressing ? ' pressing' : ''}`}
+      onPointerDown={start}
+      onPointerUp={stop}
+      onPointerLeave={stop}
+      onPointerCancel={stop}
+      onContextMenu={(e) => e.preventDefault()}
+      onClick={() => {
+        if (held.current) {
+          held.current = false
+          return
+        }
+        onTap()
+      }}
+    >
+      {label}
+    </button>
+  )
 }
 
 export function Game() {
   const { state, dispatch, player } = useStore()
   const game = state.game
-  const [sheet, setSheet] = useState(null) // 'add' | 'custom:<playerId>' | 'menu'
+  const [sheet, setSheet] = useState(null) // 'add' | 'menu' | { custom: playerId }
   const [customAmount, setCustomAmount] = useState('')
+  const [newName, setNewName] = useState('')
+  useMinuteTick()
 
   const seated = new Set(game.seats.map((s) => s.playerId))
   const bench = state.players.filter((p) => !seated.has(p.id))
+  const pot = potTotal(game)
 
   const buyIn = (playerId, amount) => {
-    dispatch({ type: 'BUY_IN', playerId, amount, label: `${player(playerId).name} +${fmt(amount)}` })
-    if (navigator.vibrate) navigator.vibrate(8)
+    dispatch({
+      type: 'BUY_IN',
+      playerId,
+      amount,
+      label: `${player(playerId).name} +${fmt(amount)}`,
+    })
+    buzz()
   }
+
+  // Someone who showed up unannounced, two hours in: roster + seat in one go.
+  const addNewPlayer = (e) => {
+    e.preventDefault()
+    const name = newName.trim()
+    if (!name) return
+    const id = uid()
+    dispatch({ type: 'ADD_PLAYER', id, name })
+    dispatch({ type: 'ADD_SEAT', playerId: id })
+    setNewName('')
+    setSheet(null)
+  }
+
+  const customFor = sheet && sheet.custom
 
   return (
     <>
@@ -30,6 +112,9 @@ export function Game() {
         {game.seats.map((seat) => {
           const p = player(seat.playerId)
           const total = seat.buyIns.reduce((s, b) => s + b.amount, 0)
+          // Rebuys of an odd size make "3 × $20" a lie, so only claim it when
+          // every buy-in really was the default.
+          const uniform = seat.buyIns.every((b) => b.amount === game.defaultBuyIn)
           return (
             <div key={seat.playerId} className="seat">
               <Avatar player={p} />
@@ -38,80 +123,95 @@ export function Game() {
                 <div className="meta">
                   {seat.buyIns.length === 0
                     ? 'No buy-in yet'
-                    : `${seat.buyIns.length} × ${fmt(game.defaultBuyIn)}`}
+                    : uniform
+                      ? `${seat.buyIns.length} × ${fmt(game.defaultBuyIn)}`
+                      : `${seat.buyIns.length} buy-ins`}
                 </div>
               </div>
-              <div className="in num">{fmt(total)}</div>
-              <button
-                className="buy-btn"
-                onClick={() => buyIn(seat.playerId, game.defaultBuyIn)}
-                onContextMenu={(e) => {
-                  e.preventDefault()
+              <div className="in num" data-zero={total === 0}>
+                {fmt(total)}
+              </div>
+              <BuyButton
+                label={`+${fmt(game.defaultBuyIn)}`}
+                onTap={() => buyIn(seat.playerId, game.defaultBuyIn)}
+                onHold={() => {
                   setCustomAmount('')
-                  setSheet(`custom:${seat.playerId}`)
+                  setSheet({ custom: seat.playerId })
                 }}
-              >
-                +
-              </button>
+              />
+              <span className="sr">
+                {p.name} is in for {fmt(total)}
+              </span>
             </div>
           )
         })}
 
-        <div className="row" style={{ gap: 8, marginTop: 16 }}>
+        <div className="row" style={{ gap: 8, marginTop: 14 }}>
           <button className="btn btn-sm" style={{ flex: 1 }} onClick={() => setSheet('add')}>
-            + Add player
+            Add player
           </button>
           <button className="btn btn-sm" style={{ flex: 1 }} onClick={() => setSheet('menu')}>
             Game options
           </button>
         </div>
 
-        <button
-          className="btn btn-primary btn-block"
-          style={{ marginTop: 20 }}
-          disabled={potTotal(game) === 0}
-          onClick={() => dispatch({ type: 'SET_PHASE', phase: 'cashout' })}
-        >
-          Cash out
-        </button>
-
-        <div className="empty" style={{ paddingBottom: 8 }}>
-          Running {elapsed(game.startedAt)} · long-press + for a custom amount
-        </div>
+        <p className="hint" style={{ textAlign: 'center' }}>
+          Running {elapsed(game.startedAt)} · hold + for a custom amount
+        </p>
       </div>
+
+      <Dock>
+        <div className="footer">
+          <button
+            className="btn btn-primary btn-block"
+            disabled={pot === 0}
+            onClick={() => dispatch({ type: 'SET_PHASE', phase: 'cashout' })}
+          >
+            Cash out
+          </button>
+        </div>
+      </Dock>
 
       {sheet === 'add' && (
         <Sheet title="Add a player" onClose={() => setSheet(null)}>
-          {bench.length === 0 && (
-            <div className="empty">Everyone in your roster is already seated.</div>
-          )}
           {bench.map((p) => (
             <button
               key={p.id}
-              className="seat"
-              style={{ width: '100%', textAlign: 'left' }}
+              className="seat flat"
               onClick={() => {
                 dispatch({ type: 'ADD_SEAT', playerId: p.id })
                 setSheet(null)
               }}
             >
-              <Avatar player={p} />
+              <Avatar player={p} size={30} />
               <div className="info">
                 <div className="name">{p.name}</div>
               </div>
             </button>
           ))}
+          <form onSubmit={addNewPlayer} className="row" style={{ marginTop: 10 }}>
+            <input
+              className="chip"
+              style={{ flex: 1 }}
+              placeholder="Someone new"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+            <button className="btn btn-sm" type="submit" disabled={!newName.trim()}>
+              Add
+            </button>
+          </form>
         </Sheet>
       )}
 
-      {sheet?.startsWith('custom:') && (
-        <Sheet title="Custom amount" onClose={() => setSheet(null)}>
+      {customFor && (
+        <Sheet title={`Buy-in for ${player(customFor).name}`} onClose={() => setSheet(null)}>
           <label className="field">
-            <span>Buy-in for {player(sheet.slice(7)).name}</span>
+            <span>Amount</span>
             <input
               autoFocus
               inputMode="decimal"
-              placeholder="0.00"
+              placeholder="0"
               value={customAmount}
               onChange={(e) => setCustomAmount(e.target.value)}
             />
@@ -120,20 +220,21 @@ export function Game() {
             className="btn btn-primary btn-block"
             disabled={toCents(customAmount) <= 0}
             onClick={() => {
-              buyIn(sheet.slice(7), toCents(customAmount))
+              buyIn(customFor, toCents(customAmount))
               setSheet(null)
             }}
           >
-            Add {fmt(toCents(customAmount))}
+            {toCents(customAmount) > 0 ? `Add ${fmt(toCents(customAmount))}` : 'Add'}
           </button>
           <button
             className="btn btn-block btn-danger"
             style={{ marginTop: 8 }}
+            disabled={game.seats.find((s) => s.playerId === customFor).buyIns.length === 0}
             onClick={() => {
               dispatch({
                 type: 'REMOVE_LAST_BUY_IN',
-                playerId: sheet.slice(7),
-                label: 'Removed last buy-in',
+                playerId: customFor,
+                label: `${player(customFor).name} · buy-in removed`,
               })
               setSheet(null)
             }}
@@ -145,29 +246,42 @@ export function Game() {
 
       {sheet === 'menu' && (
         <Sheet title="Game options" onClose={() => setSheet(null)}>
-          {game.seats.map((seat) => (
-            <div key={seat.playerId} className="cashout-row">
-              <Avatar player={player(seat.playerId)} size={30} />
-              <div className="info">
-                <div className="name">{player(seat.playerId).name}</div>
-              </div>
-              <button
-                className="btn btn-sm btn-danger"
-                onClick={() =>
-                  dispatch({
-                    type: 'REMOVE_SEAT',
-                    playerId: seat.playerId,
-                    label: `Removed ${player(seat.playerId).name}`,
-                  })
-                }
-              >
-                Remove
-              </button>
-            </div>
-          ))}
+          <div className="section-label" style={{ marginTop: 0 }}>
+            Remove from the table
+          </div>
+          <div className="card">
+            {game.seats.map((seat) => {
+              const p = player(seat.playerId)
+              const total = seat.buyIns.reduce((s, b) => s + b.amount, 0)
+              return (
+                <div key={seat.playerId} className="net-row">
+                  <Avatar player={p} size={30} />
+                  <div className="info">
+                    <div className="name">{p.name}</div>
+                    <div className="meta">in {fmt(total)}</div>
+                  </div>
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() =>
+                      dispatch({
+                        type: 'REMOVE_SEAT',
+                        playerId: seat.playerId,
+                        label: `${p.name} left · ${fmt(total)} off the table`,
+                      })
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+          <p className="hint">
+            Removing a player takes their buy-ins off the table too. Undo is on the toast.
+          </p>
           <button
             className="btn btn-block btn-danger"
-            style={{ marginTop: 16 }}
+            style={{ marginTop: 14 }}
             onClick={() => {
               dispatch({ type: 'CANCEL_GAME', label: 'Game discarded' })
               setSheet(null)

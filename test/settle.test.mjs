@@ -1,5 +1,5 @@
 import { nets, potTotal, countedTotal, minimizePayments } from '../src/lib/settle.js'
-import { fmt, toCents } from '../src/lib/money.js'
+import { fmt, fmtSigned, toCents, toInput } from '../src/lib/money.js'
 
 const seat = (id, buyIns, cashOut) => ({
   playerId: id,
@@ -56,8 +56,36 @@ check('all flat: no payments', minimizePayments(nets(g3)).length, 0)
 
 check('toCents 47.50', toCents('47.50'), 4750)
 check('toCents $20', toCents('$20'), 2000)
+check('toCents empty', toCents(''), 0)
+check('toCents junk', toCents('abc'), 0)
+check('toCents rounds to the cent', toCents('33.333'), 3333)
 check('fmt whole', fmt(2000), '$20')
 check('fmt cents', fmt(4750), '$47.50')
+check('fmt groups thousands', fmt(123456), '$1,234.56')
+check('fmt negative', fmt(-2000), '-$20')
+check('fmtSigned up', fmtSigned(4000), '+$40')
+check('fmtSigned down', fmtSigned(-3000), '-$30')
+check('fmtSigned flat', fmtSigned(0), '$0')
+// What a text field shows: never a trailing .00 the host has to backspace past.
+check('toInput whole', toInput(2000), '20')
+check('toInput cents', toInput(4750), '47.50')
+check('toInput empty', toInput(null), '')
+
+// A three-way split with cents: the settlement still has to clear exactly.
+const g4 = { seats: [
+  seat('a', [3333], 5000),
+  seat('b', [3333], 2500),
+  seat('c', [3334], 2500),
+]}
+const n4 = nets(g4)
+check('odd cents: counted equals pot', countedTotal(g4), potTotal(g4))
+const pay4 = minimizePayments(n4)
+const cleared = {}
+for (const p of pay4) {
+  cleared[p.from] = (cleared[p.from] || 0) - p.amount
+  cleared[p.to] = (cleared[p.to] || 0) + p.amount
+}
+check('odd cents: settlement clears every net', n4.every(x => (cleared[x.playerId] || 0) === x.net), true)
 
 console.log(fail ? `\n${fail} FAILED` : '\nAll passed')
 process.exit(fail ? 1 : 0)
