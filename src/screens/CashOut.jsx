@@ -1,114 +1,90 @@
-import { useState } from 'react'
 import { useStore } from '../store'
-import { fmt, toCents, toInput } from '../lib/money'
+import { fmt } from '../lib/money'
 import { countedTotal, potTotal } from '../lib/settle'
-import { Avatar, Dock } from '../components/UI'
+import { Avatar, Dock, MoneyInput } from '../components/UI'
 
 export function CashOut() {
   const { state, dispatch, player } = useStore()
   const game = state.game
-
-  // The field holds the raw string while it is being typed. Round-tripping
-  // through cents on every keystroke rewrites "20." to "20.00" under the
-  // cursor; the draft is dropped on blur so the store stays the source of truth.
-  const [draft, setDraft] = useState({})
-
   const pot = potTotal(game)
   const counted = countedTotal(game)
   const diff = counted - pot
-  const allEntered = game.seats.every((s) => s.cashOut != null)
-  const remaining = game.seats.filter((s) => s.cashOut == null).length
-  const tone = allEntered ? (diff === 0 ? 'balanced' : 'off') : 'neutral'
+  const entered = game.seats.filter((s) => s.cashOut != null).length
+  const allEntered = entered === game.seats.length
+  const remaining = game.seats.length - entered
 
-  // Neutral counts stacks, not dollars: a delta mid-entry always reads as an
-  // error the host has not made yet.
-  const verdict =
-    tone === 'neutral'
-      ? `${remaining} left to count`
-      : tone === 'balanced'
-        ? 'Balanced'
-        : `${diff > 0 ? 'over' : 'short'} ${fmt(Math.abs(diff))}`
-
-  const label = !allEntered ? 'Enter every stack' : diff !== 0 ? `Off by ${fmt(Math.abs(diff))}` : 'Settle up'
+  // Red is reserved for "you say you are done and you are not." While stacks
+  // are still outstanding the bar stays quiet.
+  const tone = !allEntered ? null : diff === 0 ? 'ok' : 'bad'
 
   return (
     <>
-      <div className="screen">
-        <div className="tally" data-state={tone} role="status" aria-live="polite">
-          <span>
-            Counted <span className="counted num">{fmt(counted)}</span> of{' '}
-            <span className="counted num">{fmt(pot)}</span>
-          </span>
-          <span className="verdict num">{verdict}</span>
+      <div className="scroll">
+        <div className="tally" data-tone={tone || undefined}>
+          <div>
+            <div className="t1 num">
+              Counted {fmt(counted)} of {fmt(pot)}
+            </div>
+            <div className="t2">
+              {!allEntered
+                ? `${remaining} stack${remaining === 1 ? '' : 's'} left`
+                : diff === 0
+                  ? 'The chips match the money'
+                  : diff < 0
+                    ? 'A stack is under-counted, or a rebuy is missing'
+                    : 'A stack is over-counted, or a buy-in was never logged'}
+            </div>
+          </div>
+          <div className="badge num">
+            {!allEntered
+              ? `${entered} of ${game.seats.length}`
+              : diff === 0
+                ? 'balanced'
+                : `${diff > 0 ? 'over' : 'short'} ${fmt(Math.abs(diff))}`}
+          </div>
         </div>
 
-        <div className="card">
+        <div className="list">
           {game.seats.map((seat) => {
             const p = player(seat.playerId)
-            const inFor = seat.buyIns.reduce((s, b) => s + b.amount, 0)
-            const value = draft[seat.playerId] ?? toInput(seat.cashOut)
+            const total = seat.buyIns.reduce((s, b) => s + b.amount, 0)
             return (
-              <div key={seat.playerId} className="stack-row">
-                <Avatar player={p} size={32} />
-                <div className="info">
-                  <div className="name">{p.name}</div>
-                  <div className="meta">in {fmt(inFor)}</div>
+              <div key={seat.playerId} className="row compact">
+                <Avatar player={p} size={30} />
+                <div className="who">
+                  <div className="nm sm">{p.name}</div>
+                  <div className="meta num">in {fmt(total)}</div>
                 </div>
-                <div className="money-input">
-                  <span aria-hidden="true">$</span>
-                  <input
-                    className="num"
-                    inputMode="decimal"
-                    placeholder="0"
-                    aria-label={`${p.name} final stack`}
-                    value={value}
-                    onFocus={(e) => e.target.select()}
-                    onChange={(e) => {
-                      const raw = e.target.value
-                      setDraft((d) => ({ ...d, [seat.playerId]: raw }))
-                      dispatch({
-                        type: 'SET_CASH_OUT',
-                        playerId: seat.playerId,
-                        amount: raw.trim() === '' ? null : toCents(raw),
-                      })
-                    }}
-                    onBlur={() =>
-                      setDraft((d) => {
-                        const { [seat.playerId]: _drop, ...rest } = d
-                        return rest
-                      })
-                    }
-                  />
-                </div>
+                <MoneyInput
+                  cents={seat.cashOut}
+                  onCents={(amount) =>
+                    dispatch({ type: 'SET_CASH_OUT', playerId: seat.playerId, amount })
+                  }
+                />
               </div>
             )
           })}
         </div>
 
-        <p className="hint">
-          What each player is holding when they leave the table. It has to match the pot
-          before you can settle — nobody is short a chip, so the difference is always a
-          counting mistake.
-        </p>
-      </div>
-
-      <Dock>
-        <div className="footer">
-          <button
-            className="btn btn-primary btn-block"
-            data-tone={allEntered && diff !== 0 ? 'error' : undefined}
-            disabled={!allEntered || diff !== 0}
-            onClick={() => dispatch({ type: 'SET_PHASE', phase: 'settle' })}
-          >
-            {label}
-          </button>
-          <button
-            className="btn btn-quiet btn-block"
-            onClick={() => dispatch({ type: 'SET_PHASE', phase: 'playing' })}
-          >
+        <div className="subrow">
+          <button className="lnk" onClick={() => dispatch({ type: 'SET_PHASE', phase: 'playing' })}>
             Back to the game
           </button>
         </div>
+      </div>
+
+      <Dock>
+        <button
+          className={`btn${!allEntered ? ' off' : diff !== 0 ? ' bad' : ''}`}
+          disabled={!allEntered || diff !== 0}
+          onClick={() => dispatch({ type: 'SET_PHASE', phase: 'settle' })}
+        >
+          {!allEntered
+            ? 'Enter every stack'
+            : diff !== 0
+              ? `Off by ${fmt(Math.abs(diff))}`
+              : 'Settle up'}
+        </button>
       </Dock>
     </>
   )

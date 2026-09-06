@@ -32,6 +32,14 @@ npm test         # settle math + money parsing (node, no framework)
 Cash games only. Tournaments, blinds, side games, prop bets, multi-device sync, and
 accounts are all explicitly out of scope — see `DESIGN-SPEC.md` §3.
 
+## Visual language
+
+"One lamp over a dark table" — warm blacks, brass as the action colour, clay-chip
+player identities. **Brass means "touch this." Green and red only ever describe
+money**, so never use the accent for a positive number or the up-colour for a
+button. Tokens live at the top of `src/index.css`; the frames they came from are
+`DESIGN-SPEC.md` §10.
+
 ## Payments
 
 Venmo and Cash App have no peer-to-peer API. `src/lib/payments.js` builds deep links

@@ -32,3 +32,9 @@ export function fmtSigned(cents) {
   if (cents === 0) return '$0'
   return `${cents > 0 ? '+' : '-'}${fmt(Math.abs(cents))}`
 }
+
+// Same rule as fmt but without the "$", for use inside an input.
+export function display(cents) {
+  if (cents == null) return ''
+  return cents % 100 === 0 ? String(cents / 100) : (cents / 100).toFixed(2)
+}

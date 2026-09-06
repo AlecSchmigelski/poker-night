@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from './store'
 import { fmt } from './lib/money'
-import { potTotal } from './lib/settle'
+import { countedTotal, potTotal } from './lib/settle'
 import { NewGame } from './screens/NewGame'
 import { Game } from './screens/Game'
 import { CashOut } from './screens/CashOut'
@@ -10,14 +10,6 @@ import { Players } from './screens/Players'
 import { Ledger } from './screens/Ledger'
 import { Toast } from './components/Toast'
 import { Icon } from './components/UI'
-
-// The header is the one persistent thing across the three game phases — the
-// content swaps underneath it, there is no page transition (§12).
-const PHASES = {
-  playing: ['Tonight', 'Tap + for a rebuy'],
-  cashout: ['Cash out', 'Count every stack'],
-  settle: ['Settle up', 'Fewest possible payments'],
-}
 
 const TABS = [
   ['game', 'Game'],
@@ -30,36 +22,51 @@ export default function App() {
   const [tab, setTab] = useState('game')
   const game = state.game
 
-  let body
+  // The header is the one persistent thing across the three game phases. The
+  // content swaps underneath it; there is no page transition.
   let title = ['New game', 'Pick a buy-in and who is playing']
-  let pot = null
+  let right = null
+  let tone = null
+  let body
 
   if (tab === 'players') {
-    title = ['Players', 'Roster and groups']
+    const missing = state.players.filter((p) => !p.venmo && !p.cashapp).length
+    title = ['Players', missing ? 'Handles make settling one tap' : 'Roster and groups']
     body = <Players />
   } else if (tab === 'ledger') {
-    title = ['Ledger', 'Lifetime standings']
+    title = ['Ledger', ledgerHint(state.history)]
     body = <Ledger />
   } else if (!game) {
     body = <NewGame />
+  } else if (game.phase === 'playing') {
+    title = ['Tonight', `Tap + for a ${fmt(game.defaultBuyIn)} rebuy`]
+    right = ['On the table', fmt(potTotal(game))]
+    body = <Game />
+  } else if (game.phase === 'cashout') {
+    const balanced =
+      game.seats.every((s) => s.cashOut != null) && countedTotal(game) === potTotal(game)
+    tone = balanced ? 'ok' : null
+    title = ['Cash out', balanced ? 'Every stack accounted for' : 'Count every stack']
+    right = ['On the table', fmt(potTotal(game))]
+    body = <CashOut />
   } else {
-    title = PHASES[game.phase]
-    pot = potTotal(game)
-    body =
-      game.phase === 'playing' ? <Game /> : game.phase === 'cashout' ? <CashOut /> : <Settle />
+    title = ['Settle up', game.payments.length ? 'Fewest possible payments' : 'Nothing to move']
+    right = ['Payments', String(game.payments.length)]
+    body = <Settle />
   }
 
   return (
     <div className="app">
-      <header className="topbar">
-        <div className="info">
-          <h1>{title[0]}</h1>
-          <div className="sub">{title[1]}</div>
+      <header className="hdr">
+        <div className="lamp" data-tone={tone || undefined} />
+        <div className="left">
+          <div className="title">{title[0]}</div>
+          <div className="hint">{title[1]}</div>
         </div>
-        {pot != null && (
-          <div className="pot">
-            <div className="label">On the table</div>
-            <div className="value num">{fmt(pot)}</div>
+        {right && (
+          <div className="right">
+            <div className="potlabel">{right[0]}</div>
+            <div className="pot num" data-tone={tone || undefined}>{right[1]}</div>
           </div>
         )}
       </header>
@@ -67,10 +74,10 @@ export default function App() {
       {body}
 
       <div className="dock">
+        <Toast />
         {/* Screens portal their primary action here, above the tab bar. */}
         <div id="dock-slot" />
-        <Toast />
-        <nav className="tabbar">
+        <nav className="tabs">
           {TABS.map(([id, label]) => (
             <button
               key={id}
@@ -83,6 +90,15 @@ export default function App() {
           ))}
         </nav>
       </div>
+
+      <div id="sheet-slot" />
     </div>
   )
+}
+
+function ledgerHint(history) {
+  if (!history.length) return 'Standings and past nights'
+  const first = new Date(history[history.length - 1].endedAt)
+  const month = first.toLocaleDateString(undefined, { month: 'long' })
+  return `${history.length} night${history.length === 1 ? '' : 's'} since ${month}`
 }

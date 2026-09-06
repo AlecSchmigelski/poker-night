@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '../store'
 
-// Undo, not confirmation (§4.3). The action already happened; this is the way
-// back. Auto-dismisses at 4s so it never blocks the bottom of the screen.
+// The toast states the amount every time, which is why the rebuy button itself
+// does not have to carry it. Labels are structured rather than markup — player
+// names are user input and must never be interpreted as HTML.
 export function Toast() {
   const { state, dispatch } = useStore()
   const [visible, setVisible] = useState(false)
@@ -18,11 +19,17 @@ export function Toast() {
   }, [state.undoLabel, state.past])
 
   if (!visible || !state.undoLabel) return null
+  const label = state.undoLabel
+  const { text, amount } = typeof label === 'string' ? { text: label } : label
 
   return (
-    <div className="toast" role="status" aria-live="polite">
-      <span>{state.undoLabel}</span>
+    <div className="toast" role="status">
+      <span>
+        {text}
+        {amount && <> <b className="num">{amount}</b></>}
+      </span>
       <button
+        className="u"
         onClick={() => {
           dispatch({ type: 'UNDO' })
           setVisible(false)

@@ -1,18 +1,26 @@
+import { useState } from 'react'
 import { useStore } from '../store'
 import { fmt, fmtSigned } from '../lib/money'
 import { nets, potTotal } from '../lib/settle'
-import { Avatar, Empty } from '../components/UI'
-
-const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`
+import { Avatar, Dock, Empty } from '../components/UI'
+import { Recap } from './Recap'
 
 export function Ledger() {
   const { state, player } = useStore()
+  const [recap, setRecap] = useState(null)
 
   if (state.history.length === 0) {
     return (
-      <div className="screen">
-        <Empty title="No games yet.">Finish a night and it lands here.</Empty>
-      </div>
+      <>
+        <div className="scroll">
+          <Empty ring title="No games yet." >
+            Finish a night and it lands here, with everyone's running total.
+          </Empty>
+        </div>
+        <Dock>
+          <div className="btn ghost" style={{ opacity: 0.6 }}>Start a game from the Game tab</div>
+        </Dock>
+      </>
     )
   }
 
@@ -29,59 +37,60 @@ export function Ledger() {
   const standings = Object.entries(totals).sort((a, b) => b[1].net - a[1].net)
 
   return (
-    <div className="screen">
-      <div className="section-label">
-        <span>All time</span>
-        <span className="count num">{plural(state.history.length, 'night')}</span>
-      </div>
-      <div className="card">
+    <>
+      <div className="scroll">
+        <div className="sec"><span>All time</span></div>
+        {/* Rank numbers earn their place here because this content genuinely
+            is an ordering. */}
         {standings.map(([id, t], i) => (
-          <div key={id} className="net-row">
-            <span className="rank num" data-top={i === 0}>
-              {i + 1}
-            </span>
-            <Avatar player={player(id)} size={30} />
-            <div className="info">
-              <div className="name">{player(id).name}</div>
-              <div className="meta num">
-                {plural(t.nights, 'night')} · {t.up} up
-              </div>
+          <div key={id} className="net">
+            <span className="rank num">{i + 1}</span>
+            <Avatar player={player(id)} size={26} />
+            <div className="who">
+              <div className="nm sm">{player(id).name}</div>
+              <div className="meta">{t.nights} night{t.nights === 1 ? '' : 's'} · up {t.up}</div>
             </div>
-            <div className={`val num ${t.net > 0 ? 'up' : t.net < 0 ? 'down' : 'flat'}`}>
+            <div className={`amt sm num ${t.net > 0 ? 'up' : t.net < 0 ? 'down' : 'flat'}`}>
               {fmtSigned(t.net)}
             </div>
           </div>
         ))}
+
+        <div className="sec"><span>Past games</span></div>
+        <div className="list">
+          {state.history.map((game) => {
+            const ranked = nets(game).sort((a, b) => b.net - a.net)
+            const winner = ranked[0]
+            return (
+              <button key={game.id} className="row compact" onClick={() => setRecap(game)}>
+                <div className="who">
+                  <div className="nm sm">
+                    {new Date(game.endedAt).toLocaleDateString(undefined, {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </div>
+                  <div className="meta num">
+                    {game.seats.length} players · {fmt(potTotal(game))} pot
+                  </div>
+                </div>
+                {winner && (
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 14, fontWeight: 580 }}>{player(winner.playerId).name}</div>
+                    <div className={`amt num ${winner.net > 0 ? 'up' : 'flat'}`}
+                      style={{ fontSize: 13.5, marginTop: 2 }}>
+                      {fmtSigned(winner.net)}
+                    </div>
+                  </div>
+                )}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      <div className="section-label">Past games</div>
-      {state.history.map((game) => {
-        const winner = nets(game).sort((a, b) => b.net - a.net)[0]
-        const outstanding = game.payments.filter((p) => !p.paid).length
-        return (
-          <div key={game.id} className="game-row">
-            <div className="info">
-              <div className="name">
-                {new Date(game.endedAt).toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-              </div>
-              <div className="meta num">
-                {plural(game.seats.length, 'player')} · {fmt(potTotal(game))} pot
-                {outstanding > 0 && ` · ${outstanding} unpaid`}
-              </div>
-            </div>
-            {winner && winner.net > 0 && (
-              <>
-                <Avatar player={player(winner.playerId)} size={26} />
-                <span className="val num up">{fmtSigned(winner.net)}</span>
-              </>
-            )}
-          </div>
-        )
-      })}
-    </div>
+      {recap && <Recap game={recap} onClose={() => setRecap(null)} />}
+    </>
   )
 }

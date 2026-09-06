@@ -1,126 +1,110 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { display, toCents } from '../lib/money'
 
-// Two initials max. Names are user-typed, so tolerate junk: an empty name
-// still needs a stable circle rather than an empty one.
-export function initialsOf(name) {
-  const parts = String(name || '').trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '?'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-}
-
-// Colour is identity (§9) — it is what tells two Mikes apart, so it is never
-// decorative and never varies by screen.
-export function Avatar({ player, size = 36 }) {
+export function Avatar({ player, size }) {
+  const initials = player.name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
   return (
-    <div
-      className="avatar"
-      aria-hidden="true"
-      style={{
-        background: player.color,
-        width: size,
-        height: size,
-        fontSize: Math.round(size * 0.39),
-      }}
-    >
-      {initialsOf(player.name)}
+    <div className={`av${size ? ` s${size}` : ''}`} style={{ background: player.color }} aria-hidden="true">
+      {initials}
     </div>
   )
 }
 
-export function Empty({ title, children }) {
+export function Empty({ title, ring, boxed, children }) {
   return (
-    <div className="empty">
-      {title && <strong>{title}</strong>}
-      {children}
+    <div className={`empty${boxed ? ' boxed' : ''}`}>
+      {ring && <div className="ring" />}
+      <h4>{title}</h4>
+      {children && <p>{children}</p>}
     </div>
   )
 }
 
-// Bottom sheet (§8.7). Backdrop tap or Escape closes; there is no cancel
-// button because dismissal is the gesture, not a control.
-export function Sheet({ title, onClose, children }) {
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    document.addEventListener('keydown', onKey)
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prev
-    }
-  }, [onClose])
-
-  return (
-    <div className="sheet-backdrop" onPointerDown={onClose}>
-      <div
-        className="sheet"
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onPointerDown={(e) => e.stopPropagation()}
-      >
-        <div className="grabber" />
-        {title && <h2>{title}</h2>}
-        {children}
-      </div>
-    </div>
-  )
-}
-
-// Primary actions belong in the thumb zone (§5), so screens render them into
-// the dock above the tab bar instead of at the bottom of a scrolling list.
+// Screens portal their primary action into the dock so it sits above the tab
+// bar without each screen having to know the shell's layout.
 export function Dock({ children }) {
   const [slot, setSlot] = useState(null)
   useEffect(() => setSlot(document.getElementById('dock-slot')), [])
-  return slot ? createPortal(children, slot) : null
+  return slot ? createPortal(<div className="dock-inner">{children}</div>, slot) : null
 }
 
-const stroke = {
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 1.8,
-  strokeLinecap: 'round',
-  strokeLinejoin: 'round',
+export function Sheet({ title, hint, onClose, children }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const slot = document.getElementById('sheet-slot')
+  if (!slot) return null
+
+  return createPortal(
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        {title && <h2>{title}</h2>}
+        {hint && <div className="sheet-hint">{hint}</div>}
+        {children}
+      </div>
+    </div>,
+    slot,
+  )
 }
 
-export function Icon({ name, size = 21 }) {
-  const common = { width: size, height: size, viewBox: '0 0 24 24', 'aria-hidden': 'true' }
-  if (name === 'game')
-    return (
-      <svg {...common}>
-        <circle cx="12" cy="12" r="8.5" {...stroke} />
-        <circle cx="12" cy="12" r="3.5" {...stroke} />
-        <path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2" {...stroke} />
-      </svg>
-    )
-  if (name === 'players')
-    return (
-      <svg {...common}>
-        <circle cx="9" cy="8.5" r="3.5" {...stroke} />
-        <path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5" {...stroke} />
-        <path d="M16 5.6a3.5 3.5 0 0 1 0 6.3M17.5 14.9c1.9.6 3 2.4 3 4.6" {...stroke} />
-      </svg>
-    )
-  if (name === 'ledger')
-    return (
-      <svg {...common}>
-        <path d="M5 4.5h14v15H5z" {...stroke} />
-        <path d="M8.5 9h7M8.5 12.5h7M8.5 16h4" {...stroke} />
-      </svg>
-    )
-  if (name === 'arrow')
-    return (
-      <svg {...common} viewBox="0 0 24 24">
-        <path d="M4 12h15M13.5 6.5 20 12l-6.5 5.5" {...stroke} />
-      </svg>
-    )
-  if (name === 'check')
-    return (
-      <svg {...common}>
-        <path d="M5 12.5 10 17.5 19 7" {...stroke} strokeWidth="2.2" />
-      </svg>
-    )
-  return null
+const PATHS = {
+  game: <><rect x="3" y="5" width="18" height="14" rx="3" /><circle cx="12" cy="12" r="3" /></>,
+  players: (
+    <>
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M3.5 19c.6-3.2 2.9-5 5.5-5s4.9 1.8 5.5 5" />
+      <path d="M16.5 7.2a3 3 0 0 1 0 5.6M18 14.4c2 .8 3.2 2.4 3.5 4.6" />
+    </>
+  ),
+  ledger: <path d="M4 6h16M4 12h16M4 18h10" />,
+}
+
+export function Icon({ name }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      {PATHS[name]}
+    </svg>
+  )
+}
+
+// A money field that keeps the "$" as furniture rather than as typed input.
+// It holds its own draft string: deriving the text from cents on every render
+// rewrites "47." into "47.00" under the cursor and makes cents impossible to type.
+export function MoneyInput({ cents, onCents, placeholder = '0', autoFocus }) {
+  const [draft, setDraft] = useState(display(cents))
+
+  // Resync only when the value changed somewhere else (an undo, a reset).
+  useEffect(() => {
+    if (toCents(draft) !== (cents ?? 0)) setDraft(display(cents))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cents])
+
+  return (
+    <div className="numin">
+      <span aria-hidden="true">$</span>
+      <input
+        className="num"
+        inputMode="decimal"
+        autoFocus={autoFocus}
+        placeholder={placeholder}
+        value={draft}
+        onFocus={(e) => e.target.select()}
+        onChange={(e) => {
+          const raw = e.target.value
+          if (!/^[0-9]*\.?[0-9]{0,2}$/.test(raw)) return
+          setDraft(raw)
+          onCents(raw === '' ? null : toCents(raw))
+        }}
+      />
+    </div>
+  )
 }

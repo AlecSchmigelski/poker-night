@@ -190,9 +190,10 @@ labeled "On the table." Left side: "Tonight" and a quiet hint line.
 - 10+ players (scrolling with the header pinned)
 - Undo toast visible over the bottom action
 
-**Design question for you:** the `+` button currently adds the *default* buy-in
-silently. Should the row show the amount on the button (`+$20`) instead of a bare
-`+`? It costs width but removes ambiguity. I lean yes.
+**Resolved:** the button stays a bare `+`. The amount is stated in the header hint
+("Tap + for a $20 rebuy") and again in every undo toast ("Jo +$20"), so putting it
+on the button costs ~18pt of name width on every row to repeat something already
+said twice.
 
 ---
 
@@ -329,8 +330,32 @@ Design these as a system; they repeat across screens.
 
 ## 10. Visual language
 
-Current implementation values, offered as a starting point rather than a
-constraint. **Push back on these — a sharper direction is the point of the exercise.**
+**Resolved.** The direction below was proposed in answer to §16 and is now what
+is built: *one lamp over a dark table*. The blacks warm up (brown cast, not cyan)
+and the action colour moved from mint to brass.
+
+The reason is worth keeping: the original palette gave green three jobs at once —
+primary action, positive net, and balanced state — so on Settle Up the button, the
+winner, and the tally all read as the same thing. **Brass now means "touch this."
+Green and red only ever describe money.**
+
+```
+Table      #141110   app background      Brass   #E9A13B   action, and only action
+Felt       #1D1917   cards and rows      Up      #5DBE8C   positive money
+Rail       #292320   inputs, secondary   Down    #E4695A   negative money
+Hairline   #38302B   borders             Chalk   #F3ECE3   text
+Smoke      #A69890   muted text, 5.9:1 on Felt
+```
+
+Player identity uses eight clay chip denominations rather than a generic wheel:
+`#D6473F #4A7FD1 #3F9E62 #8A5FCB #D9BC4A #4FAEB8 #DB6E9E #E8E0D2`, assigned in
+roster order and permanent.
+
+The one bold move is the lamp: a warm radial glow bleeding down from the top of
+the header, behind the pot total.
+
+<details>
+<summary>Superseded starting point</summary>
 
 ```
 Background      #0D1011      near-black, slight cool cast
@@ -346,6 +371,8 @@ Radius          14px cards, 11px controls, 999px chips
 
 Player colors are drawn from an 8-color palette and assigned in roster order:
 `#E5544B #F0A04B #E8CF4B #5BC47A #4BB8C4 #5A8CE8 #9B6BE8 #E56BB0`
+
+</details>
 
 **Typography rules that are not negotiable:**
 - **All money uses tabular figures.** Columns of dollar amounts must align.
@@ -439,10 +466,27 @@ functional but unremarkable. The app is used at a table with friends at midnight
 there may be a warmer or more distinctive direction that does not cost legibility.
 Show me one.
 
+## 16a. Built beyond the frames
+
+Two features from the roadmap ship in this design language but were not drawn:
+
+- **Chip denominations** — a sheet reached from New Game and Game options. Define
+  what each colour is worth, and get a suggested starting stack for the buy-in,
+  weighted toward small chips so people can actually bet. Purely a counting aid;
+  it never touches the money.
+- **Recap card** — a shareable 1080×1350 PNG drawn on a canvas, reached from
+  Settle Up and from any past game in the Ledger. Carries the standings plus three
+  superlatives (took the night, most reloads, funded it). Self-contained: no
+  library, no fonts to load, no network.
+
+Deliberately **not** built: a blind timer (tournament-only, and this is a cash-game
+app) and the live guest view (needs a backend, ruled out by §3).
+
 ## 17. Data model, for reference
 
 ```
 Player  { id, name, color, venmo, cashapp }
+Chip    { color, value }
 Group   { id, name, playerIds[] }
 Game    { id, startedAt, defaultBuyIn, phase, seats[], payments[] }
 Seat    { playerId, buyIns[{ id, amount, at }], cashOut }

@@ -4,12 +4,22 @@ import { minimizePayments, nets } from './lib/settle'
 
 const KEY = 'poker-night/v1'
 
+// Clay chip denominations rather than a generic colour wheel. Assigned in
+// roster order and permanent — this is how two players named Sam stay apart.
 export const COLORS = [
-  '#e5544b', '#f0a04b', '#e8cf4b', '#5bc47a',
-  '#4bb8c4', '#5a8ce8', '#9b6be8', '#e56bb0',
+  '#D6473F', '#4A7FD1', '#3F9E62', '#8A5FCB',
+  '#D9BC4A', '#4FAEB8', '#DB6E9E', '#E8E0D2',
 ]
 
-const empty = { players: [], groups: [], game: null, history: [] }
+const DEFAULT_CHIPS = [
+  { color: '#E8E0D2', value: 25 },
+  { color: '#D6473F', value: 100 },
+  { color: '#4A7FD1', value: 500 },
+  { color: '#3F9E62', value: 2500 },
+  { color: '#14100E', value: 10000 },
+]
+
+const empty = { players: [], groups: [], game: null, history: [], chips: DEFAULT_CHIPS }
 
 function load() {
   try {
@@ -171,6 +181,9 @@ function reducer(state, action) {
 
     case 'CANCEL_GAME':
       return { ...state, game: null }
+
+    case 'SET_CHIPS':
+      return { ...state, chips: action.chips }
 
     case 'DELETE_HISTORY':
       return { ...state, history: state.history.filter((g) => g.id !== action.id) }
