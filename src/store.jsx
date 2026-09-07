@@ -173,6 +173,8 @@ function reducer(state, action) {
               ? {
                   ...s,
                   cashOut: action.amount,
+                  // When they left, so the log can place it in sequence.
+                  cashedOutAt: action.amount == null ? null : (s.cashedOutAt ?? Date.now()),
                   // Marks someone who left mid-game, so the end-of-night count
                   // shows their number as already settled rather than asking
                   // the host to count a stack that is no longer there.

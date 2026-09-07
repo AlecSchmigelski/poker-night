@@ -883,3 +883,22 @@ input { -webkit-appearance: none; }
   border: 1px solid var(--hairline);
   color: var(--chalk);
 }
+
+/* ---------- log entry icons ---------- */
+
+.entry-icon {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+  color: var(--smoke);
+  display: block;
+}
+.log-row .type {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--smoke);
+  font-size: 12.5px;
+  margin-top: 3px;
+}
+.log-row[data-kind='cashout'] .amt { color: var(--smoke); }
