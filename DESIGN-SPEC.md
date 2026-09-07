@@ -486,6 +486,33 @@ functional but unremarkable. The app is used at a table with friends at midnight
 there may be a warmer or more distinctive direction that does not cost legibility.
 Show me one.
 
+## 10a. Night report
+
+The record of one finished night, built to `night-report-handoff.md`. Reached by
+tapping a past game in the Ledger or on Home, and shown straight after a game is
+saved from Settle Up.
+
+It answers three questions in order: who won and by how much, what each person
+put in, and what the night was in aggregate. **It is not Settle Up** — it never
+says who pays whom, and nothing on it is tappable except the dock button.
+
+- **Diverging bars** around a centre zero line, scaled to the night rather than
+  an absolute axis, so the biggest winner and biggest loser both reach full
+  length. Buy-in amounts vary through a night, so a per-buy-in axis would be
+  meaningless — do not reintroduce one, and never show a rebuy *count* where a
+  dollar amount belongs.
+- Bar width is a CSS percentage of half the track with a `max(3px, …)` floor, so
+  it scales with the column at any width and a $1 net still draws.
+- Sorted by net descending; ties to whoever risked more, then by name.
+- Everyone flat gets its own card rather than an empty area. An unbalanced game
+  renders anyway with a muted `Off by $15` line — it should be impossible, and
+  it is still not worth an error dialog.
+
+**Known gap:** the handoff asks the 10.5px sub-line to scale with Dynamic Type.
+The app is px-based throughout, so nothing scales with the system setting. The
+row survives ~15% larger type (49px → 54px, inside the 62px limit), but honouring
+that item properly means moving the whole app to relative units.
+
 ## 11a. Home
 
 The landing tab. It exists because of one gap, not to be a dashboard: **once a

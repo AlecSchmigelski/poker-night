@@ -6,7 +6,7 @@ import { cashAppLink, venmoLink } from '../lib/payments'
 import { Avatar, Dock, Sheet } from '../components/UI'
 import { Recap } from './Recap'
 
-export function Settle() {
+export function Settle({ onFinished }) {
   const { state, dispatch, player } = useStore()
   const game = state.game
   const ranked = nets(game).sort((a, b) => b.net - a.net)
@@ -108,7 +108,10 @@ export function Settle() {
       <Dock>
         <button
           className="btn"
-          onClick={() => dispatch({ type: 'FINISH_GAME', label: { text: 'Night saved' } })}
+          onClick={() => {
+            dispatch({ type: 'FINISH_GAME', label: { text: 'Night saved' } })
+            onFinished?.()
+          }}
         >
           {allPaid || game.payments.length === 0 ? 'Save and finish' : 'Save to history'}
         </button>

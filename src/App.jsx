@@ -3,6 +3,8 @@ import { useStore } from './store'
 import { fmt } from './lib/money'
 import { countedTotal, inPlay, potTotal } from './lib/settle'
 import { Home } from './screens/Home'
+import { NightReport } from './screens/NightReport'
+import { nightReport } from './lib/report'
 import { NewGame } from './screens/NewGame'
 import { Game } from './screens/Game'
 import { CashOut } from './screens/CashOut'
@@ -20,9 +22,17 @@ const TABS = [
 ]
 
 export default function App() {
-  const { state } = useStore()
+  const { state, player } = useStore()
   const [tab, setTab] = useState('home')
+  // A finished night being read. 'latest' resolves to the game just saved.
+  const [report, setReport] = useState(null)
   const game = state.game
+
+  const reportGame = report === 'latest' ? state.history[0] : report
+  const openTab = (id) => {
+    setReport(null)
+    setTab(id)
+  }
 
   // The header is the one persistent thing across the three game phases. The
   // content swaps underneath it; there is no page transition.
@@ -31,16 +41,24 @@ export default function App() {
   let tone = null
   let body
 
-  if (tab === 'home') {
+  if (reportGame) {
+    const r = nightReport(reportGame, player)
+    title = [
+      r.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
+      `Biggest swing ${fmt(r.maxAbsNet)}`,
+    ]
+    right = ['On the table', fmt(r.pot)]
+    body = <NightReport game={reportGame} />
+  } else if (tab === 'home') {
     title = ['Poker Night', game ? 'A game is running' : homeHint(state)]
-    body = <Home onGo={setTab} />
+    body = <Home onGo={openTab} onOpenNight={setReport} />
   } else if (tab === 'players') {
     const missing = state.players.filter((p) => !p.venmo && !p.cashapp).length
     title = ['Players', missing ? 'Handles make settling one tap' : 'Roster and groups']
     body = <Players />
   } else if (tab === 'ledger') {
     title = ['Ledger', ledgerHint(state.history)]
-    body = <Ledger />
+    body = <Ledger onOpen={setReport} />
   } else if (!game) {
     body = <NewGame />
   } else if (game.phase === 'playing') {
@@ -77,7 +95,9 @@ export default function App() {
         {right && (
           <div className="right">
             <div className="potlabel">{right[0]}</div>
-            <div className="pot num" data-tone={tone || undefined}>{right[1]}</div>
+            <div className={`pot num${reportGame ? ' report' : ''}`} data-tone={tone || undefined}>
+            {right[1]}
+          </div>
           </div>
         )}
       </header>
@@ -93,7 +113,7 @@ export default function App() {
             <button
               key={id}
               aria-current={tab === id ? 'page' : undefined}
-              onClick={() => setTab(id)}
+              onClick={() => openTab(id)}
             >
               <Icon name={id} />
               {label}

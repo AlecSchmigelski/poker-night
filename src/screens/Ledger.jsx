@@ -1,13 +1,10 @@
-import { useState } from 'react'
 import { useStore } from '../store'
 import { fmt, fmtSigned } from '../lib/money'
 import { nets, potTotal } from '../lib/settle'
 import { Avatar, Dock, Empty } from '../components/UI'
-import { Recap } from './Recap'
 
-export function Ledger() {
+export function Ledger({ onOpen }) {
   const { state, player } = useStore()
-  const [recap, setRecap] = useState(null)
 
   if (state.history.length === 0) {
     return (
@@ -62,7 +59,7 @@ export function Ledger() {
             const ranked = nets(game).sort((a, b) => b.net - a.net)
             const winner = ranked[0]
             return (
-              <button key={game.id} className="row compact" onClick={() => setRecap(game)}>
+              <button key={game.id} className="row compact" onClick={() => onOpen(game)}>
                 <div className="who">
                   <div className="nm sm">
                     {new Date(game.endedAt).toLocaleDateString(undefined, {
@@ -90,7 +87,6 @@ export function Ledger() {
         </div>
       </div>
 
-      {recap && <Recap game={recap} onClose={() => setRecap(null)} />}
     </>
   )
 }

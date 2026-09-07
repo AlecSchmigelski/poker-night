@@ -5,7 +5,6 @@ import { inPlay, nets, potTotal } from '../lib/settle'
 import { outstanding, standings, totalOutstanding } from '../lib/debts'
 import { status, clock } from '../lib/bombpot'
 import { Avatar } from '../components/UI'
-import { Recap } from './Recap'
 
 function elapsed(since, now) {
   const mins = Math.floor((now - since) / 60000)
@@ -13,9 +12,8 @@ function elapsed(since, now) {
   return `${Math.floor(mins / 60)}h ${mins % 60}m`
 }
 
-export function Home({ onGo }) {
+export function Home({ onGo, onOpenNight }) {
   const { state, dispatch, player } = useStore()
-  const [recap, setRecap] = useState(null)
   const game = state.game
   const owed = outstanding(state.history)
   const table = standings(state.history, nets)
@@ -98,7 +96,7 @@ export function Home({ onGo }) {
         {lastNight && (
           <>
             <div className="sec"><span>Last night</span></div>
-            <button className="row compact" onClick={() => setRecap(lastNight)}>
+            <button className="row compact" onClick={() => onOpenNight(lastNight)}>
               <div className="who">
                 <div className="nm sm">
                   {new Date(lastNight.endedAt).toLocaleDateString(undefined, {
@@ -126,7 +124,6 @@ export function Home({ onGo }) {
         </div>
       </div>
 
-      {recap && <Recap game={recap} onClose={() => setRecap(null)} />}
     </>
   )
 }

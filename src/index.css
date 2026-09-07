@@ -913,3 +913,121 @@ input { -webkit-appearance: none; }
   font-weight: 600;
 }
 .owned input:focus { border-color: var(--brass); }
+
+/* ---------- night report ---------- */
+
+.pot.report { font-size: 40px; }
+
+.strip { display: flex; gap: 7px; }
+.strip .card {
+  flex: 1;
+  background: var(--felt);
+  border: 1px solid var(--hairline);
+  border-radius: 13px;
+  padding: 11px 10px;
+  min-width: 0;
+}
+.strip .v {
+  font-size: 19px;
+  font-weight: 660;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.strip .k {
+  font-size: 11px;
+  color: var(--smoke);
+  margin-top: 3px;
+}
+
+.report-label {
+  font-size: 12.5px;
+  font-weight: 580;
+  color: var(--smoke);
+  margin: 6px 2px 8px;
+}
+.report-note {
+  font-size: 12.5px;
+  color: var(--smoke);
+  margin: 10px 2px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The row. Fixed columns, one flexible track. */
+.nrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 0;
+}
+.nrow .who { width: 68px; flex: 0 0 auto; min-width: 0; }
+.nrow .name {
+  font-size: 13.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nrow .sub {
+  font-size: 10.5px;
+  color: var(--smoke);
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.nrow .track {
+  flex: 1;
+  height: 22px;
+  position: relative;
+  background: rgba(41, 35, 32, 0.5);
+  border-radius: 5px;
+  min-width: 0;
+}
+.nrow .zero {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 1px;
+  background: #4B4038;
+}
+/* Width is a percentage of half the track, so the bar scales with the column
+   without measuring it. max() keeps a $1 net visible. */
+.nrow .bar {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  border-radius: 3px;
+}
+.nrow .bar.pos { background: var(--up); left: 50%; }
+.nrow .bar.neg { background: var(--down); right: 50%; }
+.nrow .figure {
+  width: 48px;
+  flex: 0 0 auto;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 640;
+  font-variant-numeric: tabular-nums;
+}
+.nrow .figure.pos { color: var(--up); }
+.nrow .figure.neg { color: var(--down); }
+.nrow .figure.flat { color: var(--smoke); }
+
+.broke-even {
+  background: var(--felt);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  text-align: center;
+  padding: 30px 20px;
+}
+.broke-even .t { font-size: 17px; font-weight: 600; letter-spacing: -0.015em; }
+.broke-even .s { font-size: 14.5px; color: var(--smoke); margin-top: 7px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .nrow .bar { animation: grow 220ms ease-out; }
+}
+@keyframes grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.nrow .bar.pos { transform-origin: left center; }
+.nrow .bar.neg { transform-origin: right center; }
