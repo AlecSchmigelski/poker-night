@@ -30,7 +30,7 @@ export function BuyInLog({ game, onClose }) {
       hint={
         entries.length === 0
           ? undefined
-          : `${entries.length} buy-in${entries.length === 1 ? '' : 's'} · ${rebuys} rebuy${
+          : `${entries.length} entr${entries.length === 1 ? 'y' : 'ies'} · ${rebuys} add-on${
               rebuys === 1 ? '' : 's'
             }${rebuys === 0 ? '' : unsigned ? ` · ${unsigned} unsigned` : ' · all signed'}`
       }
@@ -48,14 +48,16 @@ export function BuyInLog({ game, onClose }) {
                 <Avatar player={p} size={26} />
                 <div className="who">
                   <div className="nm sm">{p.name}</div>
+                  {/* Every row states what it is. An add-on used to be implied
+                      only by the presence of a signature, which left the type
+                      unreadable on any row that was never signed. */}
+                  <div className="meta">{e.rebuy ? 'add-on' : 'buy-in'}</div>
                 </div>
                 {e.signature ? (
                   <SignatureMark strokes={e.signature} />
                 ) : e.rebuy ? (
                   <span className="unsigned">unsigned</span>
-                ) : (
-                  <span className="meta">buy-in</span>
-                )}
+                ) : null}
                 <div className="amt sm num">{fmt(e.amount)}</div>
               </div>
             )

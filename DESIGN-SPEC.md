@@ -607,10 +607,14 @@ Scoping it to rebuys keeps the opening round at one tap per player.
   Verify stays disabled until there is a mark.
 - **Add without signing** is always offered. Someone stepping outside must not
   block their own rebuy, and a log that forces a signature just gets fake ones.
-- **The log** lists every buy-in of the night in order: time, player, the mark or
-  an `unsigned` chip, and the amount, totalling to the pot. Opening buy-ins read
-  as a quiet `buy-in` rather than being flagged — they are not meant to carry a
-  mark, so counting them as gaps would make the unsigned count meaningless. Reachable from the
+- **The log** lists every entry of the night in order: time, player, what kind
+  of entry it is, the signature or an `unsigned` chip, and the amount, totalling
+  to the pot.
+- **Every row names its type** — `buy-in` for a player's first, `add-on` for
+  everything after. Type used to be implied only by whether a signature was
+  present, which left it unreadable on any row that was never signed.
+- Opening buy-ins are not counted as gaps in the unsigned tally: they are not
+  meant to carry a mark, so including them would make the count meaningless. Reachable from the
   Game screen during play and from any past game in the Ledger.
 
 Signatures are stored as normalised stroke coordinates, not images — see the note
