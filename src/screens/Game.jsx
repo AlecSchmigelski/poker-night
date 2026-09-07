@@ -235,7 +235,7 @@ export function Game() {
       )}
 
       {sheet === 'chips' && (
-        <ChipSheet amount={game.defaultBuyIn} onClose={() => setSheet('menu')} />
+        <ChipSheet amount={game.defaultBuyIn} players={game.seats.length} onClose={() => setSheet('menu')} />
       )}
     </>
   )

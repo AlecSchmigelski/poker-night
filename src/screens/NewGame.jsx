@@ -151,7 +151,7 @@ export function NewGame() {
         </button>
       </Dock>
 
-      {sheet === 'chips' && <ChipSheet amount={amount} onClose={() => setSheet(null)} />}
+      {sheet === 'chips' && <ChipSheet amount={amount} players={Math.max(selected.length, 1)} onClose={() => setSheet(null)} />}
     </>
   )
 }

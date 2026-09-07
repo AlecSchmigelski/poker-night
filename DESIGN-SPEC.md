@@ -629,10 +629,25 @@ only place in the app a guest, rather than the host, touches the phone.
 
 Two features from the roadmap ship in this design language but were not drawn:
 
-- **Chip denominations** — a sheet reached from New Game and Game options. Define
-  what each colour is worth, and get a suggested starting stack for the buy-in,
-  weighted toward small chips so people can actually bet. Purely a counting aid;
-  it never touches the money.
+- **Chip denominations** — a sheet reached from New Game and Game options.
+  Define what each colour is worth and how many you own, and get a suggested
+  starting stack. Purely a counting aid; it never touches the money.
+
+  The distribution follows standard home-game practice, which the first version
+  got exactly backwards:
+
+  - **Value goes in the big chips, count goes in the small ones.** Weighting by
+    even value share puts a mountain of the smallest denomination in every
+    stack.
+  - The smallest chip is for betting, not for storing value: **~8–20 per stack**,
+    never more.
+  - **Three denominations** is the norm; two is clunky and four is fiddly.
+  - **No single chip worth more than a quarter of the stack** — a $100 chip in a
+    $200 stack cannot be bet with.
+  - **Never deal out the whole rack.** Inventory caps the suggestion, and if
+    nothing fits, the sheet names the shortfall rather than staying silent.
+
+  The benchmark is the canonical $1/$2 stack: 20 × $1, 16 × $5, 4 × $25.
 - **Recap card** — a shareable PNG drawn on a canvas, reached from Settle Up and
   from any past game in the Ledger. Self-contained: no library, no fonts to load,
   no network.

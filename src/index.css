@@ -892,3 +892,24 @@ input { -webkit-appearance: none; }
   margin-top: 3px;
 }
 .log-row[data-kind='cashout'] .amt { color: var(--smoke); }
+
+.owned {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  color: var(--smoke);
+}
+.owned input {
+  width: 52px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--rail);
+  border: 1px solid var(--hairline);
+  text-align: center;
+  outline: none;
+  font-size: 15px;
+  font-weight: 600;
+}
+.owned input:focus { border-color: var(--brass); }
