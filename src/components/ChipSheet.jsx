@@ -1,8 +1,17 @@
 import { useState } from 'react'
 import { useStore } from '../store'
 import { fmt } from '../lib/money'
-import { suggestStack } from '../lib/chips'
+import { suggestStack, MAX_PER_COLOUR } from '../lib/chips'
 import { Sheet, MoneyInput } from './UI'
+
+const BLIND_PRESETS = [
+  [25, 50],
+  [50, 100],
+  [100, 100],
+  [100, 200],
+  [200, 500],
+  [500, 500],
+]
 
 const CHIP_COLORS = [
   '#E8E0D2', '#D6473F', '#4A7FD1', '#3F9E62',
@@ -13,8 +22,9 @@ export function ChipSheet({ amount, players = 1, onClose }) {
   const { state, dispatch } = useStore()
   const [chips, setChips] = useState(state.chips)
   const [editing, setEditing] = useState(false)
+  const blinds = state.blinds
 
-  const stack = suggestStack(chips, amount, players)
+  const stack = suggestStack(chips, amount, players, blinds)
 
   const patch = (i, changes) =>
     setChips((c) => c.map((chip, j) => (j === i ? { ...chip, ...changes } : chip)))
@@ -88,13 +98,28 @@ export function ChipSheet({ amount, players = 1, onClose }) {
   return (
     <Sheet
       title={`Starting stack · ${fmt(amount)}`}
-      hint={`For ${players} player${players === 1 ? '' : 's'}. Most of the value in big chips, most of the count in small ones.`}
+      hint={`${players} player${players === 1 ? '' : 's'}. The small blind sets the smallest chip in play, and nobody gets more than ${MAX_PER_COLOUR} of one colour.`}
       onClose={onClose}
     >
+      <div className="sec" style={{ marginTop: 0 }}><span>Blinds</span></div>
+      <div className="chips" style={{ marginBottom: 4 }}>
+        {BLIND_PRESETS.map(([small, big]) => (
+          <button
+            key={`${small}-${big}`}
+            className="chip num"
+            data-on={blinds.small === small && blinds.big === big}
+            onClick={() => dispatch({ type: 'SET_BLINDS', blinds: { small, big } })}
+          >
+            {fmt(small)}/{fmt(big)}
+          </button>
+        ))}
+      </div>
+      <div className="sec"><span>Each player gets</span></div>
       {stack.impossible ? (
         <div className="warn" style={{ marginTop: 0 }}>
-          Your chips can't make {fmt(amount)} cleanly. Add a smaller denomination,
-          or pick a buy-in that divides into the chips you have.
+          Your chips can't make {fmt(amount)} cleanly at {fmt(blinds.small)}/
+          {fmt(blinds.big)} blinds, with no more than {MAX_PER_COLOUR} of any colour.
+          Add a denomination, or change the blinds or the buy-in.
         </div>
       ) : (
         <>

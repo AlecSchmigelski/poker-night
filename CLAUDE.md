@@ -32,6 +32,15 @@ npm test         # settle math + money parsing (node, no framework)
 Cash games only. Tournaments, blinds, side games, prop bets, multi-device sync, and
 accounts are all explicitly out of scope — see `DESIGN-SPEC.md` §3.
 
+## Chip distribution
+
+`lib/chips.js` enumerates exact solutions rather than rounding value shares —
+every count is capped at `MAX_PER_COLOUR` (15), so the space is small enough to
+search exhaustively. Two rules are load-bearing and easy to break by accident:
+the **small blind sets the floor** on which denominations enter play, and value
+must climb with denomination (most value in big chips, most count in small).
+Weighting by even value share is what produced mountains of the smallest chip.
+
 ## Hosting
 
 Live at <https://alecschmigelski.github.io/poker-night/>, deployed by GitHub

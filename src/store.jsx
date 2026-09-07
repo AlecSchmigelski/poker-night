@@ -21,7 +21,13 @@ const DEFAULT_CHIPS = [
   { color: '#14100E', value: 10000, count: 25 },
 ]
 
-const empty = { players: [], groups: [], game: null, history: [], chips: DEFAULT_CHIPS }
+// Blinds drive which denominations belong in play, so they live with the set.
+const DEFAULT_BLINDS = { small: 25, big: 50 }
+
+const empty = {
+  players: [], groups: [], game: null, history: [],
+  chips: DEFAULT_CHIPS, blinds: DEFAULT_BLINDS,
+}
 
 function load() {
   try {
@@ -37,6 +43,7 @@ function load() {
       groups: list(saved.groups, []),
       history: list(saved.history, []),
       chips: list(saved.chips, DEFAULT_CHIPS),
+      blinds: saved.blinds?.small > 0 ? saved.blinds : DEFAULT_BLINDS,
       game:
         saved.game && Array.isArray(saved.game.seats)
           ? { ...saved.game, payments: list(saved.game.payments, []) }
@@ -227,6 +234,9 @@ function reducer(state, action) {
 
     case 'SET_CHIPS':
       return { ...state, chips: action.chips }
+
+    case 'SET_BLINDS':
+      return { ...state, blinds: action.blinds }
 
     // Debts outlive the night they came from, so paid state has to be editable
     // after a game is archived.

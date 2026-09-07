@@ -639,8 +639,11 @@ Two features from the roadmap ship in this design language but were not drawn:
   - **Value goes in the big chips, count goes in the small ones.** Weighting by
     even value share puts a mountain of the smallest denomination in every
     stack.
-  - The smallest chip is for betting, not for storing value: **~8–20 per stack**,
-    never more.
+  - **The small blind sets the smallest chip in play.** A .25/.50 game needs
+    sub-dollar chips; a 1/1 game does not, and quarters in it are clutter. The
+    blinds are picked in the sheet.
+  - **Nobody gets more than 15 of any one colour.** Twenty each across eight
+    players is 160 chips of a single colour before a single rebuy.
   - **Three denominations** is the norm; two is clunky and four is fiddly.
   - **No single chip worth more than a quarter of the stack** — a $100 chip in a
     $200 stack cannot be bet with.
