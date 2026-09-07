@@ -2,11 +2,6 @@ import { useStore } from '../store'
 import { fmt } from '../lib/money'
 import { Avatar, Empty, Sheet } from '../components/UI'
 import { SignatureMark } from '../components/Signature'
-import { EntryIcon } from '../components/EntryIcon'
-
-// Swap for 'chips' or 'badge' to try the other sets in src/components/EntryIcon.jsx.
-const ICON_SET = 'flow'
-
 const LABEL = { buyin: 'buy-in', addon: 'add-on', cashout: 'cash-out' }
 
 const time = (at) =>
@@ -71,10 +66,7 @@ export function BuyInLog({ game, onClose }) {
                 <Avatar player={p} size={26} />
                 <div className="who">
                   <div className="nm sm">{p.name}</div>
-                  <div className="type">
-                    <EntryIcon kind={e.kind} set={ICON_SET} title={LABEL[e.kind]} />
-                    {LABEL[e.kind]}
-                  </div>
+                  <div className="type">{LABEL[e.kind]}</div>
                 </div>
                 {e.signature ? (
                   <SignatureMark strokes={e.signature} />
@@ -82,7 +74,7 @@ export function BuyInLog({ game, onClose }) {
                   <span className="unsigned">unsigned</span>
                 ) : null}
                 <div className="amt sm num">
-                  {e.kind === 'cashout' ? `−${fmt(e.amount)}` : fmt(e.amount)}
+                  {e.kind === 'cashout' ? `−${fmt(e.amount)}` : `+${fmt(e.amount)}`}
                 </div>
               </div>
             )

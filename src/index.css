@@ -884,19 +884,9 @@ input { -webkit-appearance: none; }
   color: var(--chalk);
 }
 
-/* ---------- log entry icons ---------- */
+/* ---------- log entry type ---------- */
 
-.entry-icon {
-  width: 21px;
-  height: 21px;
-  flex: 0 0 auto;
-  color: var(--smoke);
-  display: block;
-}
 .log-row .type {
-  display: flex;
-  align-items: center;
-  gap: 7px;
   color: var(--smoke);
   font-size: 12.5px;
   margin-top: 3px;
