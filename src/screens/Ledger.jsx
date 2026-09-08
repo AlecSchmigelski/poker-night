@@ -16,10 +16,20 @@ export function Ledger({ onOpen }) {
           <Empty ring title="No games yet." >
             Finish a night and it lands here, with everyone's running total.
           </Empty>
+
+          {/* A roster is worth keeping before the first night is played, which
+              is also the case where someone is moving between devices. */}
+          {state.players.length > 0 && (
+            <div className="subrow">
+              <button className="lnk" onClick={() => setBackup(true)}>Back up or restore</button>
+            </div>
+          )}
         </div>
         <Dock>
           <div className="btn ghost" style={{ opacity: 0.6 }}>Start a game from the Game tab</div>
         </Dock>
+
+        {backup && <Backup onClose={() => setBackup(false)} />}
       </>
     )
   }
