@@ -54,6 +54,14 @@ silently breaks GitHub Pages project sites.
 HTTPS is required in practice — Add to Home Screen, `navigator.share`, clipboard
 copy, and haptics are all secure-origin gated.
 
+## Backup
+
+Everything lives on one device, so `lib/backup.js` exports the whole store to a
+single JSON file and restores it. `lib/persist.js` owns the shape and the
+`sanitise()` guard, and **both** the store's loader and backup import go through
+it — a restored file gets exactly the same scrutiny as local state. Restoring is
+destructive and always behind a confirmation that names what is in the file.
+
 ## Failure handling
 
 `Boundary` wraps the whole tree in `main.jsx`. Any render error shows an

@@ -1,10 +1,13 @@
 import { useStore } from '../store'
 import { fmt, fmtSigned } from '../lib/money'
 import { nets, potTotal } from '../lib/settle'
+import { useState } from 'react'
 import { Avatar, Dock, Empty } from '../components/UI'
+import { Backup } from './Backup'
 
 export function Ledger({ onOpen }) {
   const { state, player } = useStore()
+  const [backup, setBackup] = useState(false)
 
   if (state.history.length === 0) {
     return (
@@ -85,7 +88,13 @@ export function Ledger({ onOpen }) {
             )
           })}
         </div>
+
+        <div className="subrow">
+          <button className="lnk" onClick={() => setBackup(true)}>Back up or restore</button>
+        </div>
       </div>
+
+      {backup && <Backup onClose={() => setBackup(false)} />}
 
     </>
   )
