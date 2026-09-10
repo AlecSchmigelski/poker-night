@@ -1,19 +1,20 @@
+import { useState } from 'react'
 import { useStore } from '../store'
 import { fmt, fmtSigned } from '../lib/money'
 import { nets, potTotal } from '../lib/settle'
-import { useState } from 'react'
 import { Avatar, Dock, Empty } from '../components/UI'
 import { Backup } from './Backup'
 
-export function Ledger({ onOpen }) {
+export function Ledger({ onOpen, onOpenPlayer }) {
   const { state, player } = useStore()
+  const [view, setView] = useState('standings')
   const [backup, setBackup] = useState(false)
 
   if (state.history.length === 0) {
     return (
       <>
         <div className="scroll">
-          <Empty ring title="No games yet." >
+          <Empty ring title="No games yet.">
             Finish a night and it lands here, with everyone's running total.
           </Empty>
 
@@ -38,10 +39,10 @@ export function Ledger({ onOpen }) {
   const totals = {}
   for (const game of state.history) {
     for (const n of nets(game)) {
-      const t = (totals[n.playerId] ??= { net: 0, nights: 0, up: 0 })
+      const t = (totals[n.playerId] ??= { net: 0, nights: 0, inTotal: 0 })
       t.net += n.net
       t.nights += 1
-      if (n.net > 0) t.up += 1
+      t.inTotal += n.buyIn
     }
   }
   const standings = Object.entries(totals).sort((a, b) => b[1].net - a[1].net)
@@ -49,55 +50,75 @@ export function Ledger({ onOpen }) {
   return (
     <>
       <div className="scroll">
-        <div className="sec"><span>All time</span></div>
-        {/* Rank numbers earn their place here because this content genuinely
-            is an ordering. */}
-        {standings.map(([id, t], i) => (
-          <div key={id} className="net">
-            <span className="rank num">{i + 1}</span>
-            <Avatar player={player(id)} size={26} />
-            <div className="who">
-              <div className="nm sm">{player(id).name}</div>
-              <div className="meta">{t.nights} night{t.nights === 1 ? '' : 's'} · up {t.up}</div>
-            </div>
-            <div className={`amt sm num ${t.net > 0 ? 'up' : t.net < 0 ? 'down' : 'flat'}`}>
-              {fmtSigned(t.net)}
-            </div>
-          </div>
-        ))}
+        {/* Rank numerals were what made this a podium. Sorted rows with signed
+            money carry the same order without the ceremony. */}
+        <div className="segwrap" role="tablist">
+          {[['standings', 'Standings'], ['nights', 'Nights']].map(([id, label]) => (
+            <button
+              key={id}
+              className="seg"
+              role="tab"
+              aria-selected={view === id}
+              data-on={view === id}
+              onClick={() => setView(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
-        <div className="sec"><span>Past games</span></div>
-        <div className="list">
-          {state.history.map((game) => {
-            const ranked = nets(game).sort((a, b) => b.net - a.net)
-            const winner = ranked[0]
-            return (
-              <button key={game.id} className="row compact" onClick={() => onOpen(game)}>
+        {view === 'standings' ? (
+          <div className="list">
+            {standings.map(([id, t]) => (
+              <button key={id} className="row" onClick={() => onOpenPlayer(id)}>
+                <Avatar player={player(id)} size={30} />
                 <div className="who">
-                  <div className="nm sm">
-                    {new Date(game.endedAt).toLocaleDateString(undefined, {
-                      weekday: 'short',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </div>
+                  <div className="nm">{player(id).name}</div>
                   <div className="meta num">
-                    {game.seats.length} players · {fmt(potTotal(game))} pot
+                    {t.nights} night{t.nights === 1 ? '' : 's'} · {fmt(t.inTotal)} in
                   </div>
                 </div>
-                {winner && (
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 14, fontWeight: 580 }}>{player(winner.playerId).name}</div>
-                    <div className={`amt num ${winner.net > 0 ? 'up' : 'flat'}`}
-                      style={{ fontSize: 13.5, marginTop: 2 }}>
-                      {fmtSigned(winner.net)}
+                <div className={`amt num ${t.net > 0 ? 'up' : t.net < 0 ? 'down' : 'zero'}`}>
+                  {fmtSigned(t.net)}
+                </div>
+                <span className="chev" aria-hidden="true">›</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="list">
+            {state.history.map((game) => {
+              const ranked = nets(game).sort((a, b) => b.net - a.net)
+              const winner = ranked[0]
+              return (
+                <button key={game.id} className="row compact" onClick={() => onOpen(game)}>
+                  <div className="who">
+                    <div className="nm sm">
+                      {new Date(game.endedAt).toLocaleDateString(undefined, {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </div>
+                    <div className="meta num">
+                      {game.seats.length} players · {fmt(potTotal(game))} pot
                     </div>
                   </div>
-                )}
-              </button>
-            )
-          })}
-        </div>
+                  {winner && (
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 14, fontWeight: 580 }}>{player(winner.playerId).name}</div>
+                      <div className={`amt num ${winner.net > 0 ? 'up' : 'flat'}`}
+                        style={{ fontSize: 13.5, marginTop: 2 }}>
+                        {fmtSigned(winner.net)}
+                      </div>
+                    </div>
+                  )}
+                  <span className="chev" aria-hidden="true">›</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
 
         <div className="subrow">
           <button className="lnk" onClick={() => setBackup(true)}>Back up or restore</button>
@@ -105,7 +126,6 @@ export function Ledger({ onOpen }) {
       </div>
 
       {backup && <Backup onClose={() => setBackup(false)} />}
-
     </>
   )
 }

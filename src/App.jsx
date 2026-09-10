@@ -4,6 +4,7 @@ import { fmt } from './lib/money'
 import { countedTotal, inPlay, potTotal } from './lib/settle'
 import { Home } from './screens/Home'
 import { NightReport } from './screens/NightReport'
+import { PlayerDetail } from './screens/PlayerDetail'
 import { nightReport } from './lib/report'
 import { NewGame } from './screens/NewGame'
 import { Game } from './screens/Game'
@@ -26,13 +27,17 @@ export default function App() {
   const [tab, setTab] = useState('home')
   // A finished night being read. 'latest' resolves to the game just saved.
   const [report, setReport] = useState(null)
+  // A player being read. Remembers which tab it was opened from.
+  const [person, setPerson] = useState(null)
   const game = state.game
 
   const reportGame = report === 'latest' ? state.history[0] : report
   const openTab = (id) => {
     setReport(null)
+    setPerson(null)
     setTab(id)
   }
+  const openPlayer = (playerId) => setPerson({ playerId, from: tab === 'players' ? 'Players' : 'Ledger' })
 
   // The header is the one persistent thing across the three game phases. The
   // content swaps underneath it; there is no page transition.
@@ -41,7 +46,21 @@ export default function App() {
   let tone = null
   let body
 
-  if (reportGame) {
+  if (person) {
+    // The player screen carries its own back nav, so the app header steps aside.
+    title = null
+    body = (
+      <PlayerDetail
+        playerId={person.playerId}
+        from={person.from}
+        onBack={() => setPerson(null)}
+        onOpenNight={(game) => {
+          setPerson(null)
+          setReport(game)
+        }}
+      />
+    )
+  } else if (reportGame) {
     const r = nightReport(reportGame, player)
     title = [
       r.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
@@ -55,10 +74,10 @@ export default function App() {
   } else if (tab === 'players') {
     const missing = state.players.filter((p) => !p.venmo && !p.cashapp).length
     title = ['Players', missing ? 'Handles make settling one tap' : 'Roster and groups']
-    body = <Players />
+    body = <Players onOpenPlayer={openPlayer} />
   } else if (tab === 'ledger') {
     title = ['Ledger', ledgerHint(state.history)]
-    body = <Ledger onOpen={setReport} />
+    body = <Ledger onOpen={setReport} onOpenPlayer={openPlayer} />
   } else if (!game) {
     body = <NewGame />
   } else if (game.phase === 'playing') {
@@ -86,6 +105,7 @@ export default function App() {
 
   return (
     <div className="app">
+      {title && (
       <header className="hdr">
         <div className="lamp" data-tone={tone || undefined} />
         <div className="left">
@@ -101,6 +121,7 @@ export default function App() {
           </div>
         )}
       </header>
+      )}
 
       {body}
 

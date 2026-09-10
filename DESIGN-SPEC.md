@@ -486,6 +486,40 @@ functional but unremarkable. The app is used at a table with friends at midnight
 there may be a warmer or more distinctive direction that does not cost legibility.
 Show me one.
 
+## 9a. Player detail
+
+One player across every night they have played, built to
+`stats-design-handoff.md` and the frames returned against it. Reached from the
+Ledger standings and from the Players roster.
+
+The screen exists at n=8..26, which decides everything on it:
+
+- **Counting stats only.** No win rate, no streaks, no projection. At this sample
+  size they would be noise wearing a number.
+- **Every dollar carries its denominator** — `+$135` sits above `over 20 nights`,
+  and the quote line is written with the denominator attached so it cannot be
+  requoted as a rate.
+- **A single night is a dot, not a line.** Drawing a line through one point
+  invents a shape that does not exist.
+- **A note appears when the shape alone would mislead**: three nights is not a
+  pattern, eleven nights back where they started, one night accounting for nearly
+  all of a total, or months away from the table.
+
+The chart is cumulative net on **session index, never calendar date** — a skipped
+fortnight would otherwise open a gap that reads as a drought. Zero is always
+inside the plot, so the baseline always means something. Nothing on it is
+interactive: at twenty points the targets are smaller than a fingertip.
+
+**The Ledger changed with it.** Rank numerals are gone — the money already
+carries the order, and the numbering added a podium nobody asked for. Rows gained
+a chevron and a denominator, and a Standings / Nights segment gives the
+night-by-night list somewhere to live.
+
+**Diverged from the frames:** the top-right action is a pencil rather than a
+share glyph. Sharing already has a home in `Copy for the chat` at the bottom of
+the same screen, and editing had nowhere to go once roster rows stopped opening
+the edit sheet directly.
+
 ## 10a. Night report
 
 The record of one finished night, built to `night-report-handoff.md`. Reached by

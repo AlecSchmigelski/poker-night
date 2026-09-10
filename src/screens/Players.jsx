@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useStore } from '../store'
 import { Avatar, Dock, Empty, Sheet } from '../components/UI'
 
-export function Players() {
+export function Players({ onOpenPlayer }) {
   const { state } = useStore()
   const [editing, setEditing] = useState(null)
   const [group, setGroup] = useState(null)
@@ -43,13 +43,14 @@ export function Players() {
             {state.players.map((p) => {
               const handles = [p.venmo && `@${p.venmo}`, p.cashapp && `$${p.cashapp}`].filter(Boolean)
               return (
-                <button key={p.id} className="row compact" onClick={() => setEditing({ ...p })}>
+                <button key={p.id} className="row compact" onClick={() => onOpenPlayer(p.id)}>
                   <Avatar player={p} size={30} />
                   <div className="who">
                     <div className="nm sm">{p.name}</div>
                     {handles.length > 0 && <div className="meta">{handles.join(' · ')}</div>}
                   </div>
                   {handles.length === 0 && <span className="chip dash sm">Add handle</span>}
+                  <span className="chev" aria-hidden="true">›</span>
                 </button>
               )
             })}
@@ -91,7 +92,7 @@ function AddPlayer({ onClose }) {
   )
 }
 
-function EditPlayer({ draft, setDraft, onClose }) {
+export function EditPlayer({ draft, setDraft, onClose }) {
   const { dispatch } = useStore()
   return (
     <Sheet
