@@ -206,6 +206,37 @@ function tracked(g, text, x, y, spacing) {
   }
 }
 
+// The same clay chip the app draws in the DOM: darkened rim, six edge spots,
+// solid face. Kept in step so the shared card matches the screen it came from.
+function chip(g, cx, cy, r, colour) {
+  g.beginPath()
+  g.arc(cx, cy, r, 0, Math.PI * 2)
+  g.fillStyle = colour
+  g.fill()
+
+  g.save()
+  g.globalAlpha = 0.22
+  g.fillStyle = '#000000'
+  g.fill()
+  g.restore()
+
+  g.save()
+  g.strokeStyle = 'rgba(255,255,255,0.7)'
+  g.lineWidth = r * 0.3
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i + Math.PI / 6
+    g.beginPath()
+    g.arc(cx, cy, r * 0.83, a - 0.15, a + 0.15)
+    g.stroke()
+  }
+  g.restore()
+
+  g.beginPath()
+  g.arc(cx, cy, r * 0.6, 0, Math.PI * 2)
+  g.fillStyle = colour
+  g.fill()
+}
+
 function initials(name) {
   return name.split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase()
 }

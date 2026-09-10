@@ -10,7 +10,7 @@ export function Avatar({ player, size }) {
     .join('')
     .toUpperCase()
   return (
-    <div className={`av${size ? ` s${size}` : ''}`} style={{ background: player.color }} aria-hidden="true">
+    <div className={`av${size ? ` s${size}` : ''}`} style={{ '--chip': player.color }} aria-hidden="true">
       {initials}
     </div>
   )

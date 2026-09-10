@@ -107,7 +107,7 @@ export function NewGame() {
         <form onSubmit={addPlayer} className="row" style={{ marginTop: 10, borderStyle: 'dashed' }}>
           <div
             className="av s30"
-            style={{ background: 'var(--rail)', color: 'var(--smoke)', fontSize: 19, fontWeight: 400 }}
+            style={{ '--chip': 'var(--rail)', color: 'var(--smoke)', fontSize: 19, fontWeight: 400 }}
             aria-hidden="true"
           >
             +

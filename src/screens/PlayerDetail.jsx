@@ -39,7 +39,7 @@ export function PlayerDetail({ playerId, from, onBack, onOpenNight }) {
         </div>
 
         <div className="ident">
-          <div className="av48" style={{ background: p.color }} aria-hidden="true">
+          <div className="av48" style={{ '--chip': p.color }} aria-hidden="true">
             {initials(p.name)}
           </div>
           <div className="idtext">
