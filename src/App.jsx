@@ -5,6 +5,7 @@ import { countedTotal, inPlay, potTotal } from './lib/settle'
 import { Home } from './screens/Home'
 import { NightReport } from './screens/NightReport'
 import { PlayerDetail } from './screens/PlayerDetail'
+import { TableSide } from './screens/TableSide'
 import { nightReport } from './lib/report'
 import { NewGame } from './screens/NewGame'
 import { Game } from './screens/Game'
@@ -103,50 +104,61 @@ export default function App() {
     body = <Settle />
   }
 
+  // The side panel belongs to the game surface. On the other tabs it would only
+  // repeat what is already on screen, and it has no place over a night report
+  // or a player screen.
+  const withSide = !!game && tab === 'game' && !person && !reportGame
+
   return (
-    <div className="app">
-      {title && (
-      <header className="hdr">
-        <div className="lamp" data-tone={tone || undefined} />
-        <div className="left">
-          <div className="title">{title[0]}</div>
-          <div className="hint">{title[1]}</div>
-        </div>
-        {right && (
-          <div className="right">
-            <div className="potlabel">{right[0]}</div>
-            <div className={`pot num${reportGame ? ' report' : ''}`} data-tone={tone || undefined}>
-            {right[1]}
-          </div>
-          </div>
+    <div className={`app${withSide ? ' with-side' : ''}`}>
+      <div className="main">
+        {title && (
+          <header className="hdr">
+            <div className="lamp" data-tone={tone || undefined} />
+            <div className="left">
+              <div className="title">{title[0]}</div>
+              <div className="hint">{title[1]}</div>
+            </div>
+            {right && (
+              <div className="right">
+                <div className="potlabel">{right[0]}</div>
+                <div className={`pot num${reportGame ? ' report' : ''}`} data-tone={tone || undefined}>
+                  {right[1]}
+                </div>
+              </div>
+            )}
+          </header>
         )}
-      </header>
-      )}
 
-      {body}
+        {body}
 
-      <div className="dock">
-        <Toast />
-        {/* Screens portal their primary action here, above the tab bar. */}
-        <div id="dock-slot" />
-        <nav className="tabs">
-          {TABS.map(([id, label]) => (
-            <button
-              key={id}
-              aria-current={tab === id ? 'page' : undefined}
-              onClick={() => openTab(id)}
-            >
-              <Icon name={id} />
-              {label}
-            </button>
-          ))}
-        </nav>
+        <div className="dock">
+          <Toast />
+          {/* Screens portal their primary action here, above the tab bar. */}
+          <div id="dock-slot" />
+        </div>
       </div>
+
+      {withSide && <TableSide />}
+
+      <nav className="tabs">
+        {TABS.map(([id, label]) => (
+          <button
+            key={id}
+            aria-current={tab === id ? 'page' : undefined}
+            onClick={() => openTab(id)}
+          >
+            <Icon name={id} />
+            {label}
+          </button>
+        ))}
+      </nav>
 
       <div id="sheet-slot" />
     </div>
   )
 }
+
 
 function homeHint(state) {
   if (state.history.length === 0) return 'Your table, start to finish'

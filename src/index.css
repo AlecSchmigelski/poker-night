@@ -49,6 +49,15 @@ input { -webkit-appearance: none; }
 
 /* ---------- shell ---------- */
 
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+}
+
 .app {
   display: flex;
   flex-direction: column;
@@ -1246,4 +1255,43 @@ input { -webkit-appearance: none; }
      of stretching every row across it. */
   .app { zoom: 1.1; max-width: 760px; }
   .seats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: start; }
+
+  /* During a game the spare width becomes a second panel: the host works the
+     left, the table reads the right. Width is capped so zoom cannot push the
+     frame past the viewport. */
+  .app.with-side {
+    max-width: 920px;
+    display: grid;
+    grid-template-columns: 1fr 330px;
+    grid-template-rows: 1fr auto;
+  }
+  .app.with-side .main { grid-column: 1; grid-row: 1; }
+  .app.with-side .side {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--felt);
+    border-left: 1px solid var(--hairline);
+  }
+  .app.with-side .tabs { grid-column: 1 / -1; grid-row: 2; }
 }
+
+/* ---------- landscape side panel ---------- */
+
+.side { display: none; }
+
+.side-head { padding: 16px 16px 10px; }
+.side-title { font-size: 15px; font-weight: 620; letter-spacing: -0.01em; }
+.side-hint { font-size: 12px; color: var(--smoke); margin-top: 3px; }
+.side-list { flex: 1; overflow-y: auto; padding: 0 16px 16px; }
+
+.siderow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #241E1B;
+}
+.siderow:last-child { border-bottom: none; }
