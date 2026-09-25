@@ -1228,3 +1228,22 @@ input { -webkit-appearance: none; }
   font-family: inherit;
 }
 .quote:focus { border-color: var(--brass); }
+
+/* ---------- tablet ---------- */
+
+/* An iPad at a poker table is a shared display read from a few feet away, so
+   the win is legibility, not width. Widening the column only drifts the amount
+   away from the name; scaling keeps the proportions and makes it readable.
+   Guarded on height as well as width — a landscape iPad is shorter than a
+   phone once scaled, so it gets a gentler step. */
+@media (min-width: 700px) and (min-height: 900px) {
+  .app { zoom: 1.35; }
+}
+
+@media (min-width: 900px) and (max-height: 899px) {
+  /* Landscape is shorter than a phone once scaled, so the seat list goes
+     two-up rather than scrolling. Uses the width that is going spare instead
+     of stretching every row across it. */
+  .app { zoom: 1.1; max-width: 760px; }
+  .seats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: start; }
+}

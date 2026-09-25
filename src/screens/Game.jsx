@@ -53,7 +53,7 @@ export function Game() {
           onCloseSettings={() => setSheet(null)}
         />
 
-        <div className="list">
+        <div className="list seats">
           {game.seats.map((seat) => {
             const p = player(seat.playerId)
             const total = seat.buyIns.reduce((s, b) => s + b.amount, 0)
