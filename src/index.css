@@ -1246,9 +1246,13 @@ input { -webkit-appearance: none; }
                             pointer so an iPad with a trackpad still qualifies.
      orientation          — separates the two treatments cleanly, so a large
                             iPad in landscape cannot match both.
-     min-height           — the one that matters. Without it a big phone in
-                            landscape (932x430) matches on width alone and gets
-                            a two-panel layout 430px tall.
+     min-height           — the one that matters, and it has to sit low.
+                            Landscape Safari spends 100-140px on browser chrome,
+                            so an iPad Pro 11 reports about 694 and an iPad 10.2
+                            about 670 — not the 834 or 810 the hardware claims.
+                            Phones in the same orientation land near 290. A
+                            floor of 500 clears every phone by 200px and admits
+                            every iPad by 170.
 
    An iPad at a poker table is a shared display read from a few feet away, so
    the win is legibility, not width. Widening the column only drifts the amount
@@ -1259,7 +1263,7 @@ input { -webkit-appearance: none; }
 }
 
 @media (any-pointer: coarse) and (orientation: landscape)
-   and (min-width: 900px) and (min-height: 700px) {
+   and (min-width: 900px) and (min-height: 500px) {
   /* Landscape is shorter than a phone once scaled, so a gentler step, and the
      seat list goes two-up rather than scrolling. */
   .app { zoom: 1.1; max-width: 760px; }
