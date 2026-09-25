@@ -165,27 +165,13 @@ input { -webkit-appearance: none; }
 }
 .row.compact { min-height: 60px; }
 
-.av,
-.av48 {
+.av {
+  flex: 0 0 auto;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #14100E;
-  background:
-    radial-gradient(circle at 50% 50%, var(--chip) 0 60%, rgba(0, 0, 0, 0) 60.5%),
-    repeating-conic-gradient(
-      from 30deg,
-      rgba(255, 255, 255, 0.7) 0 16deg,
-      rgba(255, 255, 255, 0) 16deg 60deg
-    ),
-    linear-gradient(rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.22)),
-    var(--chip);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
-}
-
-.av {
-  flex: 0 0 auto;
   font-weight: 660;
+  color: #14100E;
   width: 36px;
   height: 36px;
   font-size: 13.5px;
