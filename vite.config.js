@@ -8,5 +8,7 @@ export default defineConfig({
   base: './',
   plugins: [react()],
   // Honour PORT so a second dev server can come up alongside an existing one.
-  server: { port: Number(process.env.PORT) || 5173 },
+  // host:true binds the LAN address as well as localhost, so a phone or iPad
+  // on the same wifi can load the dev server and test the real device rules.
+  server: { host: true, port: Number(process.env.PORT) || 5173 },
 })
