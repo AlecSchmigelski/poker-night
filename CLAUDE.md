@@ -119,6 +119,18 @@ deliberately excluded from the payload. Bump `VERSION` in `share.js` if the
 shape changes; `decodeSnapshot` returns null on an unknown version rather than
 guessing, and callers must render an explanation, not crash.
 
+## Talking to the device
+
+`lib/device.js` is the only file allowed to touch `navigator.vibrate`,
+`navigator.share` or `navigator.clipboard`, or to reach for a Capacitor plugin.
+Every call has three tiers: native plugin, web API, then a graceful no-op.
+Plugins are read off `globalThis.Capacitor` at runtime rather than imported, so
+there is no build-time dependency and the web build is unaffected.
+
+**Safari does not implement `navigator.vibrate`.** Haptics have never fired on
+iPhone or iPad, and never will on the web build — that only becomes real inside
+a native shell.
+
 ## Signatures
 
 Only **rebuys** are signed. A player's first buy-in commits on one tap; every

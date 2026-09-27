@@ -3,6 +3,7 @@ import { useStore } from '../store'
 import { fmt } from '../lib/money'
 import { INTERVALS, advance, clock, makeBombPot, status } from '../lib/bombpot'
 import { MoneyInput, Sheet } from './UI'
+import { haptic } from '../lib/device'
 
 // A short two-tone chime, synthesised rather than shipped as an asset. The
 // AudioContext is created on the tap that arms the timer, which is what keeps
@@ -61,7 +62,7 @@ export function BombPot({ openSettings, onCloseSettings, settingsOpen }) {
     if (!due || firing) return
     setFiring(true)
     chime.play()
-    if (navigator.vibrate) navigator.vibrate([90, 60, 90, 60, 180])
+    haptic('alert')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [due, firing])
 

@@ -5,6 +5,7 @@ import { chartNote, playerStats } from '../lib/playerStats'
 import { CHART, chartGeometry, path } from '../lib/chart'
 import { Sheet } from '../components/UI'
 import { EditPlayer } from './Players'
+import { copyText } from '../lib/device'
 
 const day = (d) => d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
 
@@ -223,12 +224,11 @@ function CopySheet({ text, onChange, onClose }) {
         className="btn"
         style={{ marginTop: 14 }}
         onClick={async () => {
-          try {
-            await navigator.clipboard.writeText(text)
-            setStatus('Copied.')
-          } catch {
-            setStatus('Could not copy — select the text above instead.')
-          }
+          setStatus(
+            (await copyText(text))
+              ? 'Copied.'
+              : 'Could not copy — select the text above instead.',
+          )
         }}
       >
         Copy

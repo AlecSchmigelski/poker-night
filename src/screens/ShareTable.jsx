@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useStore } from '../store'
 import { shareUrl } from '../lib/share'
 import { Sheet } from '../components/UI'
+import { canShareFiles, copyText, shareLink } from '../lib/device'
 
 export function ShareTable({ game, onClose }) {
   const { player } = useStore()
@@ -10,24 +11,20 @@ export function ShareTable({ game, onClose }) {
   const [url] = useState(() => shareUrl(game, player))
 
   const local = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-  const canShare = typeof navigator.share === 'function'
+  const canShare = canShareFiles()
 
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(url)
-      setStatus('Link copied.')
-    } catch {
-      setStatus('Could not copy — select the link above instead.')
-    }
+    setStatus(
+      (await copyText(url))
+        ? 'Link copied.'
+        : 'Could not copy — select the link above instead.',
+    )
   }
 
   const share = async () => {
-    if (!navigator.share) return copy()
-    try {
-      await navigator.share({ title: 'Poker Night', text: 'Tonight’s table', url })
-    } catch {
-      setStatus('Share cancelled.')
-    }
+    const result = await shareLink({ title: 'Poker Night', text: 'Tonight’s table', url })
+    if (result === 'unsupported') return copy()
+    if (result === 'cancelled') setStatus('Share cancelled.')
   }
 
   return (

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useStore } from '../store'
 import { fmt, fmtSigned } from '../lib/money'
 import { potTotal } from '../lib/settle'
+import { haptic } from '../lib/device'
 import { Avatar, Dock, MoneyInput, Sheet } from '../components/UI'
 import { ChipSheet } from '../components/ChipSheet'
 import { SignBuyIn } from './SignBuyIn'
@@ -40,7 +41,7 @@ export function Game() {
       signature,
       label: { text: player(playerId).name, amount: `+${fmt(amount)}` },
     })
-    if (navigator.vibrate) navigator.vibrate(8)
+    haptic('tap')
     setPending(null)
   }
 

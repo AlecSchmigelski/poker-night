@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useStore } from '../store'
 import { backupName, fromBackup, toBackup } from '../lib/backup'
 import { Sheet } from '../components/UI'
+import { shareFile } from '../lib/device'
 
 // Everything lives on one device, so a lost phone is a lost ledger. This is the
 // way out, and the way onto a new phone.
@@ -15,16 +16,11 @@ export function Backup({ onClose }) {
   const save = async () => {
     const name = backupName()
     const blob = new Blob([toBackup(state)], { type: 'application/json' })
-    const file = new File([blob], name, { type: 'application/json' })
 
-    if (navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file] })
-        setDone('Backup shared.')
-        return
-      } catch {
-        /* fall through to download */
-      }
+    // Share sheet first on a phone; otherwise fall through to a download.
+    if (await shareFile(blob, name, 'Poker Night backup') === 'shared') {
+      setDone('Backup shared.')
+      return
     }
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')

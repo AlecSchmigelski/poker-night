@@ -3,6 +3,7 @@ import { useStore } from '../store'
 import { fmt } from '../lib/money'
 import { canvasToBlob, duration, recapStats, renderRecapCanvas } from '../lib/recap'
 import { Sheet } from '../components/UI'
+import { shareFile } from '../lib/device'
 import { BuyInLog } from './BuyInLog'
 
 export function Recap({ game, onClose }) {
@@ -29,22 +30,14 @@ export function Recap({ game, onClose }) {
 
   const filename = `poker-night-${s.date.toISOString().slice(0, 10)}.png`
 
+  // The share sheet is the good path on a phone; the download link below is
+  // the fallback everywhere else.
   const share = async () => {
     if (!url) return
     const blob = await fetch(url).then((r) => r.blob())
-    const file = new File([blob], filename, { type: 'image/png' })
-    // Web Share with files is the good path on a phone; the download link below
-    // is the fallback everywhere else.
-    if (navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file] })
-        return
-      } catch {
-        setStatus('Share cancelled.')
-        return
-      }
-    }
-    setStatus('Sharing images is not supported here — use Save image.')
+    const result = await shareFile(blob, filename, 'Poker night')
+    if (result === 'cancelled') setStatus('Share cancelled.')
+    if (result === 'unsupported') setStatus('Sharing images is not supported here — use Save image.')
   }
 
   return (
