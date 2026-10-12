@@ -4,12 +4,14 @@ import { fmt, fmtSigned } from '../lib/money'
 import { barWidth, length, nightReport } from '../lib/report'
 import { Avatar, Dock } from '../components/UI'
 import { Recap } from './Recap'
+import { DeleteNight, EditNight } from './EditNight'
 
 // The record of one finished night. Not the settle screen: it never says who
 // pays whom, and nothing here is tappable except the dock button.
-export function NightReport({ game }) {
+export function NightReport({ game, onDeleted }) {
   const { player } = useStore()
   const [share, setShare] = useState(false)
+  const [sheet, setSheet] = useState(null)
   const r = nightReport(game, player)
 
   return (
@@ -30,7 +32,18 @@ export function NightReport({ game }) {
           </div>
         </div>
 
-        <div className="report-label">Net for the night</div>
+        <div className="report-label">
+          <span>Net for the night</span>
+          {game.editedAt && (
+            <span className="edited">
+              Edited{' '}
+              {new Date(game.editedAt).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              })}
+            </span>
+          )}
+        </div>
 
         {r.maxAbsNet === 0 ? (
           <div className="broke-even">
@@ -67,6 +80,11 @@ export function NightReport({ game }) {
         {r.off !== 0 && (
           <div className="report-note">Off by {fmt(Math.abs(r.off))}</div>
         )}
+
+        <div className="subrow">
+          <button className="lnk" onClick={() => setSheet('edit')}>Edit cash-outs</button>
+          <button className="lnk" onClick={() => setSheet('delete')}>Delete this night</button>
+        </div>
       </div>
 
       <Dock>
@@ -76,6 +94,10 @@ export function NightReport({ game }) {
       </Dock>
 
       {share && <Recap game={game} onClose={() => setShare(false)} />}
+      {sheet === 'edit' && <EditNight game={game} onClose={() => setSheet(null)} />}
+      {sheet === 'delete' && (
+        <DeleteNight game={game} onClose={() => setSheet(null)} onDeleted={onDeleted} />
+      )}
     </>
   )
 }

@@ -954,6 +954,18 @@ input { -webkit-appearance: none; }
   font-weight: 580;
   color: var(--smoke);
   margin: 6px 2px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+/* A night that was corrected after the fact says so, quietly. It is a record
+   people owe money against, so the fact of the edit is part of the record. */
+.edited {
+  font-weight: 500;
+  color: var(--smoke);
+  font-variant-numeric: tabular-nums;
 }
 .report-note {
   font-size: 12.5px;

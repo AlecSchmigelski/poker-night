@@ -226,6 +226,33 @@ function reducer(state, action) {
     case 'REPLACE_STATE':
       return { ...sanitise(action.state) }
 
+    // Correcting a saved night. Only cash-outs move: buy-ins carry signatures,
+    // and changing the amount behind a signature would make the signature a
+    // record of something that never happened.
+    case 'EDIT_NIGHT': {
+      const history = state.history.map((g) => {
+        if (g.id !== action.gameId) return g
+        const seats = g.seats.map((seat) =>
+          action.cashOuts[seat.playerId] != null
+            ? { ...seat, cashOut: action.cashOuts[seat.playerId] }
+            : seat,
+        )
+        const edited = { ...g, seats, editedAt: Date.now() }
+        // The stored settlement described the old numbers, so it is recomputed.
+        // A cleared mark only survives where the identical debt survives.
+        const before = g.payments ?? []
+        edited.payments = minimizePayments(nets(edited)).map((p) => ({
+          ...p,
+          id: uid(),
+          paid: before.some(
+            (o) => o.paid && o.from === p.from && o.to === p.to && o.amount === p.amount,
+          ),
+        }))
+        return edited
+      })
+      return { ...state, history }
+    }
+
     case 'DELETE_HISTORY':
       return { ...state, history: state.history.filter((g) => g.id !== action.id) }
 
@@ -237,7 +264,7 @@ function reducer(state, action) {
 // Actions that change money get one level of undo, surfaced as a toast.
 const UNDOABLE = new Set([
   'BUY_IN', 'REMOVE_LAST_BUY_IN', 'REMOVE_SEAT', 'FINISH_GAME', 'SET_CASH_OUT',
-  'CANCEL_GAME', 'DELETE_PLAYER', 'DELETE_GROUP', 'DELETE_HISTORY',
+  'CANCEL_GAME', 'DELETE_PLAYER', 'DELETE_GROUP', 'DELETE_HISTORY', 'EDIT_NIGHT',
 ])
 
 function withUndo(state, action) {

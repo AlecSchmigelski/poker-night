@@ -102,6 +102,7 @@ export function Ledger({ onOpen, onOpenPlayer }) {
                     </div>
                     <div className="meta num">
                       {game.seats.length} players · {fmt(potTotal(game))} pot
+                      {game.editedAt && <span className="edited"> · edited</span>}
                     </div>
                   </div>
                   {winner && (

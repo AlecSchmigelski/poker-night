@@ -27,12 +27,16 @@ export default function App() {
   const { state, player } = useStore()
   const [tab, setTab] = useState('home')
   // A finished night being read. 'latest' resolves to the game just saved.
+  // Held by id, not as a snapshot: a night that gets corrected or deleted has
+  // to be reflected here, and a captured object never changes.
   const [report, setReport] = useState(null)
   // A player being read. Remembers which tab it was opened from.
   const [person, setPerson] = useState(null)
   const game = state.game
 
-  const reportGame = report === 'latest' ? state.history[0] : report
+  const reportGame =
+    report === 'latest' ? state.history[0] : state.history.find((g) => g.id === report)
+  const openNight = (game) => setReport(game.id)
   const openTab = (id) => {
     setReport(null)
     setPerson(null)
@@ -57,7 +61,7 @@ export default function App() {
         onBack={() => setPerson(null)}
         onOpenNight={(game) => {
           setPerson(null)
-          setReport(game)
+          setReport(game.id)
         }}
       />
     )
@@ -68,17 +72,17 @@ export default function App() {
       `Biggest swing ${fmt(r.maxAbsNet)}`,
     ]
     right = ['On the table', fmt(r.pot)]
-    body = <NightReport game={reportGame} />
+    body = <NightReport game={reportGame} onDeleted={() => setReport(null)} />
   } else if (tab === 'home') {
     title = ['Poker Night', game ? 'A game is running' : homeHint(state)]
-    body = <Home onGo={openTab} onOpenNight={setReport} />
+    body = <Home onGo={openTab} onOpenNight={openNight} />
   } else if (tab === 'players') {
     const missing = state.players.filter((p) => !p.venmo && !p.cashapp).length
     title = ['Players', missing ? 'Handles make settling one tap' : 'Roster and groups']
     body = <Players onOpenPlayer={openPlayer} />
   } else if (tab === 'ledger') {
     title = ['Ledger', ledgerHint(state.history)]
-    body = <Ledger onOpen={setReport} onOpenPlayer={openPlayer} />
+    body = <Ledger onOpen={openNight} onOpenPlayer={openPlayer} />
   } else if (!game) {
     body = <NewGame />
   } else if (game.phase === 'playing') {

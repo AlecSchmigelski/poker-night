@@ -520,6 +520,27 @@ share glyph. Sharing already has a home in `Copy for the chat` at the bottom of
 the same screen, and editing had nowhere to go once roster rows stopped opening
 the edit sheet directly.
 
+## 9b. Correcting a saved night
+
+A night is a record people owe money against, so it is editable but never
+silently.
+
+- **Cash-outs only.** Buy-ins carry signatures, and changing the amount behind
+  a signature would leave the signature standing for something that never
+  happened. The buy-in log stays exactly as it was signed.
+- **It still has to balance.** The edit sheet runs the same tally as Cash Out
+  and refuses to save while the counted stacks do not equal the pot — a
+  correction cannot be a way around the one invariant the app protects.
+- **The settlement is rebuilt** from the corrected numbers, because the stored
+  payments described the old ones. A cleared "paid" mark survives only where
+  the identical debt survives: same payer, same payee, same amount. A debt that
+  moved to a different person comes back unpaid.
+- **The edit is part of the record.** `editedAt` shows as `Edited 12 Oct` beside
+  the section header and as `· edited` on the Ledger row.
+
+Deleting a night is also available from the report, behind a confirmation that
+names what goes with it. Both actions are undoable.
+
 ## 10a. Night report
 
 The record of one finished night, built to `night-report-handoff.md`. Reached by
