@@ -8,19 +8,47 @@ import { Avatar } from '../components/UI'
 //
 // It deliberately does not show tonight's win/loss during play. There isn't
 // one — the pot is communal and nobody's net exists until they count down.
+// Whether the panel has anything to say. The shell asks this before it reserves
+// a column, so the two can never disagree and leave an empty 330px of felt.
+export function hasSide(state) {
+  if (state.game) return true
+  return state.players.length > 0 && state.history.length > 0
+}
+
 export function TableSide() {
   const { state, player } = useStore()
   const game = state.game
-  if (!game) return null
+  if (!hasSide(state)) return null
+
+  // No game yet: the panel is the roster's record, which is exactly what you
+  // want beside the screen where you choose who is playing.
+  if (!game) {
+    return (
+      <AllTime
+        ids={state.players.map((p) => p.id)}
+        history={state.history}
+        player={player}
+        seated={false}
+      />
+    )
+  }
 
   if (game.phase === 'settle') return <Settling game={game} player={player} />
   if (game.phase === 'cashout') return <Counting game={game} player={player} />
-  return <AllTime game={game} history={state.history} player={player} />
+  return (
+    <AllTime
+      ids={game.seats.map((s) => s.playerId)}
+      history={state.history}
+      player={player}
+      seated
+    />
+  )
 }
 
-// While playing: lifetime standings for whoever is at the table tonight. Known,
-// real, and the thing worth arguing about between hands.
-function AllTime({ game, history, player }) {
+// Lifetime standings for the given players: whoever is at the table tonight
+// once a game is running, otherwise the whole roster. Known, real, and the
+// thing worth arguing about between hands.
+function AllTime({ ids, history, player, seated }) {
   const totals = {}
   for (const past of history) {
     for (const n of nets(past)) {
@@ -30,15 +58,19 @@ function AllTime({ game, history, player }) {
     }
   }
 
-  const rows = game.seats
-    .map((seat) => ({
-      id: seat.playerId,
-      ...(totals[seat.playerId] ?? { net: 0, nights: 0 }),
-    }))
+  const rows = ids
+    .map((id) => ({ id, ...(totals[id] ?? { net: 0, nights: 0 }) }))
     .sort((a, b) => b.net - a.net || b.nights - a.nights)
 
   return (
-    <Panel title="All time" hint={`${history.length} night${history.length === 1 ? '' : 's'} on the books`}>
+    <Panel
+      title="All time"
+      hint={
+        seated
+          ? `${history.length} night${history.length === 1 ? '' : 's'} on the books`
+          : `${rows.length} in the roster`
+      }
+    >
       {rows.map((r) => (
         <div className="siderow" key={r.id}>
           <Avatar player={player(r.id)} size={26} />

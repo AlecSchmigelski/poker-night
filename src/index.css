@@ -1252,10 +1252,13 @@ input { -webkit-appearance: none; }
 
 /* ---------- tablet ---------- */
 
+/* There was an `any-pointer: coarse` gate here to keep desktop windows of the
+   same size on the phone layout. It is gone: it could never be verified from a
+   desktop test browser, and on a real iPad it silently suppressed every rule
+   below — the whole tablet layout did nothing. A desktop browser picking up the
+   tablet treatment is a cosmetic cost; the gate failing is a total one. */
+
 /* Tablet only. Three gates, each earning its place:
-     any-pointer: coarse  — a touch device, so a desktop window of the same
-                            size is left alone. Uses any-pointer rather than
-                            pointer so an iPad with a trackpad still qualifies.
      orientation          — separates the two treatments cleanly, so a large
                             iPad in landscape cannot match both.
      min-height           — the one that matters, and it has to sit low.
@@ -1270,12 +1273,11 @@ input { -webkit-appearance: none; }
    the win is legibility, not width. Widening the column only drifts the amount
    away from the name; scaling keeps the proportions. */
 
-@media (any-pointer: coarse) and (orientation: portrait) and (min-width: 700px) {
+@media (orientation: portrait) and (min-width: 700px) {
   .app { zoom: 1.35; }
 }
 
-@media (any-pointer: coarse) and (orientation: landscape)
-   and (min-width: 900px) and (min-height: 500px) {
+@media (orientation: landscape) and (min-width: 900px) and (min-height: 500px) {
   /* Landscape is shorter than a phone once scaled, so a gentler step, and the
      seat list goes two-up rather than scrolling. */
   .app { zoom: 1.1; max-width: 760px; }

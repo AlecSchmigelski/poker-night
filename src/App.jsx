@@ -5,7 +5,7 @@ import { countedTotal, inPlay, potTotal } from './lib/settle'
 import { Home } from './screens/Home'
 import { NightReport } from './screens/NightReport'
 import { PlayerDetail } from './screens/PlayerDetail'
-import { TableSide } from './screens/TableSide'
+import { TableSide, hasSide } from './screens/TableSide'
 import { nightReport } from './lib/report'
 import { NewGame } from './screens/NewGame'
 import { Game } from './screens/Game'
@@ -110,8 +110,9 @@ export default function App() {
 
   // The side panel belongs to the game surface. On the other tabs it would only
   // repeat what is already on screen, and it has no place over a night report
-  // or a player screen.
-  const withSide = !!game && tab === 'game' && !person && !reportGame
+  // or a player screen. It does not require a live game: TableSide decides what
+  // it has to say, and before a game starts that is the roster's record.
+  const withSide = tab === 'game' && !person && !reportGame && hasSide(state)
 
   return (
     <div className={`app${withSide ? ' with-side' : ''}`}>
