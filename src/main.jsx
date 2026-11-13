@@ -4,6 +4,7 @@ import { StoreProvider } from './store'
 import App from './App'
 import { Spectator } from './screens/Spectator'
 import { Boundary } from './components/Boundary'
+import { setupNative } from './lib/device'
 import './index.css'
 
 // A link with a payload opens the read-only view instead of the app. Nothing
@@ -15,6 +16,9 @@ const shared = window.location.hash.startsWith('#g=')
 // The route is read once at boot, so a hash change inside an already-open tab
 // (tapping a shared link while the app is running) has to re-enter the app.
 window.addEventListener('hashchange', () => window.location.reload())
+
+// No-op on the web; on iOS it takes the keyboard accessory bar off the dock.
+setupNative()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

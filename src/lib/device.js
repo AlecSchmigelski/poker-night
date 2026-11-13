@@ -89,3 +89,24 @@ export async function shareFile(blob, filename, title) {
   // Filesystem round trip. Left for the Capacitor wrap rather than faked here.
   return 'unsupported'
 }
+
+// One-time native setup, called at boot. Everything here is a no-op on the web.
+//
+// The accessory bar is the grey strip iOS parks above the keyboard with its
+// prev/next arrows and a Done button. It has no web equivalent, so it never
+// appeared in any browser test — and it sits on top of the dock, covering the
+// primary action exactly when a text field is open. Every sheet in this app
+// puts its confirm button in the dock, so the bar was hiding the button you
+// reach for next. Nothing in it is useful here: there is one field per sheet,
+// so there is nothing to step between, and dismissing is what the confirm
+// button already does.
+export async function setupNative() {
+  const Keyboard = plugin('Keyboard')
+  if (!Keyboard) return false
+  try {
+    await Keyboard.setAccessoryBarVisible({ isVisible: false })
+    return true
+  } catch {
+    return false
+  }
+}
