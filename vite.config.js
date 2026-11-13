@@ -4,7 +4,9 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   // Relative so one build works at a domain root or on a project subpath
-  // (GitHub Pages) without a rebuild.
+  // (GitHub Pages) without a rebuild. The native wrap needs this too: inside
+  // Capacitor the page is served from capacitor://localhost, where an absolute
+  // '/assets/...' resolves to nothing. Do not change this to '/'.
   base: './',
   plugins: [react()],
   // Honour PORT so a second dev server can come up alongside an existing one.
