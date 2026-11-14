@@ -3,6 +3,9 @@ import { sanitise } from './persist.js'
 // A backup is the whole store in a file. It exists because the app keeps
 // everything on one device: a lost phone is a lost ledger, and unpaid debts are
 // the most valuable thing in here.
+// Deliberately not renamed with the app. This string is written inside every
+// exported file, so changing it would make every backup already on someone's
+// phone fail to import. It is never shown.
 export const FORMAT = 'poker-night-backup'
 export const VERSION = 1
 
@@ -18,7 +21,7 @@ export function toBackup(state, now) {
 export function backupName(now) {
   const d = new Date(now ?? Date.now())
   const pad = (n) => String(n).padStart(2, '0')
-  return `poker-night-backup-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`
+  return `pit-boss-backup-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`
 }
 
 // Returns { state, meta } or throws an Error whose message is safe to show.
@@ -30,7 +33,7 @@ export function fromBackup(text) {
     throw new Error("That file isn't readable. Pick the .json file the app exported.")
   }
   if (!parsed || parsed.format !== FORMAT) {
-    throw new Error("That file didn't come from Poker Night.")
+    throw new Error("That file didn't come from Pit Boss.")
   }
   if (!(parsed.version <= VERSION)) {
     throw new Error('That backup was made by a newer version of the app.')

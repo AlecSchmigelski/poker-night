@@ -14,7 +14,7 @@ export class Boundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('Poker Night crashed:', error, info)
+    console.error('Pit Boss crashed:', error, info)
   }
 
   render() {

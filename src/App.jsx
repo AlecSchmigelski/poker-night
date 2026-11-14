@@ -74,7 +74,7 @@ export default function App() {
     right = ['On the table', fmt(r.pot)]
     body = <NightReport game={reportGame} onDeleted={() => setReport(null)} />
   } else if (tab === 'home') {
-    title = ['Poker Night', game ? 'A game is running' : homeHint(state)]
+    title = ['Pit Boss', game ? 'A game is running' : homeHint(state)]
     body = <Home onGo={openTab} onOpenNight={openNight} />
   } else if (tab === 'players') {
     const missing = state.players.filter((p) => !p.venmo && !p.cashapp).length

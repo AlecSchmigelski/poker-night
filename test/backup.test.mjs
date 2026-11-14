@@ -54,7 +54,7 @@ check('meta flags no game in progress', round.meta.hasGameInProgress, false)
 
 // A file from someone else, or a mangled one, must fail with a readable reason.
 throws('rejects unreadable text', () => fromBackup('not json {{'), "isn't readable")
-throws('rejects a foreign file', () => fromBackup('{"hello":true}'), "didn't come from Poker Night")
+throws('rejects a foreign file', () => fromBackup('{"hello":true}'), "didn't come from Pit Boss")
 throws('rejects a newer format', () =>
   fromBackup(JSON.stringify({ format: FORMAT, version: 99, state: {} })), 'newer version')
 
@@ -69,7 +69,7 @@ check('an in-progress game is flagged', fromBackup(
 
 check('sanitise rejects an array', sanitise([1, 2, 3]), EMPTY)
 check('sanitise rejects null', sanitise(null), EMPTY)
-check('file name is dated', backupName(new Date(2026, 8, 8).getTime()), 'poker-night-backup-2026-09-08.json')
+check('file name is dated', backupName(new Date(2026, 8, 8).getTime()), 'pit-boss-backup-2026-09-08.json')
 
 console.log(fail ? `\n${fail} FAILED` : '\nAll passed')
 process.exit(fail ? 1 : 0)

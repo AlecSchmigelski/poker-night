@@ -1,6 +1,6 @@
 {
-  "name": "Poker Night",
-  "short_name": "Poker",
+  "name": "Pit Boss",
+  "short_name": "Pit Boss",
   "start_url": "./",
   "display": "standalone",
   "orientation": "portrait",

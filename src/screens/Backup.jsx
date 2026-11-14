@@ -18,7 +18,7 @@ export function Backup({ onClose }) {
     const blob = new Blob([toBackup(state)], { type: 'application/json' })
 
     // Share sheet first on a phone; otherwise fall through to a download.
-    if (await shareFile(blob, name, 'Poker Night backup') === 'shared') {
+    if (await shareFile(blob, name, 'Pit Boss backup') === 'shared') {
       setDone('Backup shared.')
       return
     }

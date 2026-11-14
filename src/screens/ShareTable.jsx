@@ -26,7 +26,7 @@ export function ShareTable({ game, onClose }) {
 
   const share = async () => {
     const result = await shareLink({
-      title: 'Poker Night',
+      title: 'Pit Boss',
       text: settled ? 'How tonight finished' : 'Tonight’s table',
       url,
     })

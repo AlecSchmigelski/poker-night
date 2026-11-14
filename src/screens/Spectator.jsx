@@ -16,7 +16,7 @@ export function Spectator({ encoded }) {
         <header className="hdr">
           <div className="lamp" />
           <div className="left">
-            <div className="title">Poker Night</div>
+            <div className="title">Pit Boss</div>
             <div className="hint">Shared table</div>
           </div>
         </header>
