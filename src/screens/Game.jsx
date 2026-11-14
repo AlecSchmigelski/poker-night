@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../store'
+import { uid } from '../lib/id'
 import { fmt, fmtSigned } from '../lib/money'
 import { potTotal } from '../lib/settle'
 import { haptic } from '../lib/device'
@@ -19,9 +20,23 @@ export function Game() {
   const [pending, setPending] = useState(null)
   const [acting, setActing] = useState(null)
   const [cashingOut, setCashingOut] = useState(null)
+  const [newName, setNewName] = useState('')
 
   const seated = new Set(game.seats.map((s) => s.playerId))
   const bench = state.players.filter((p) => !seated.has(p.id))
+
+  // Adds to the roster and seats them in one go: the id is generated here so
+  // the seat can reference it without waiting for a re-render.
+  const seatNewPlayer = (e) => {
+    e.preventDefault()
+    const name = newName.trim()
+    if (!name) return
+    const id = uid()
+    dispatch({ type: 'ADD_PLAYER', id, name })
+    dispatch({ type: 'ADD_SEAT', playerId: id })
+    setNewName('')
+    setSheet(null)
+  }
 
   const isRebuy = (playerId) =>
     (game.seats.find((s) => s.playerId === playerId)?.buyIns.length ?? 0) > 0
@@ -140,10 +155,15 @@ export function Game() {
       {sheet === 'share' && <ShareTable game={game} onClose={() => setSheet(null)} />}
 
       {sheet === 'add' && (
-        <Sheet title="Add a player" hint="They join with no buy-in yet." onClose={() => setSheet(null)}>
-          {bench.length === 0 ? (
-            <div className="meta">Everyone in your roster is already at the table.</div>
-          ) : (
+        <Sheet
+          title="Add a player"
+          hint="They join with no buy-in yet."
+          onClose={() => {
+            setSheet(null)
+            setNewName('')
+          }}
+        >
+          {bench.length > 0 && (
             <div className="list">
               {bench.map((p) => (
                 <button
@@ -160,6 +180,31 @@ export function Game() {
               ))}
             </div>
           )}
+
+          {/* Somebody turning up who has never played here is the usual reason
+              to open this sheet mid-game, so it takes a new name too. Without
+              this the sheet dead-ends the moment the roster is all seated. */}
+          <form onSubmit={seatNewPlayer} className="row" style={{ marginTop: bench.length ? 10 : 0, borderStyle: 'dashed' }}>
+            <div
+              className="av s30"
+              style={{ background: 'var(--rail)', color: 'var(--smoke)', fontSize: 19, fontWeight: 400 }}
+              aria-hidden="true"
+            >
+              +
+            </div>
+            <div className="who">
+              <input
+                style={{ width: '100%', outline: 'none', fontSize: 15.5 }}
+                placeholder="First name"
+                aria-label="Seat someone new to the roster"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+            </div>
+            <button type="submit" className="chip sm" disabled={!newName.trim()}>
+              Add
+            </button>
+          </form>
         </Sheet>
       )}
 

@@ -88,6 +88,18 @@ export function renderRecapCanvas(game, player, makeCanvas) {
   g.font = font(34, 640)
   tracked(g, 'POKER NIGHT', M, 150, 9)
 
+  // A night whose cash-outs were corrected says so here too. The Ledger and
+  // the night report both mark it, and the card is the copy that actually
+  // leaves the phone — leaving it off is how a corrected number gets passed
+  // around as the original.
+  if (game.editedAt) {
+    g.fillStyle = '#A69890'
+    g.font = font(30, 560)
+    g.textAlign = 'right'
+    g.fillText('EDITED', W - M, 150)
+    g.textAlign = 'left'
+  }
+
   // The date is the headline. Shrink to fit rather than truncate a weekday.
   const date = s.date.toLocaleDateString(undefined, {
     weekday: 'long',

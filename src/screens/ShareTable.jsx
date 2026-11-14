@@ -10,6 +10,9 @@ export function ShareTable({ game, onClose }) {
   // Built once per open, so the timestamp on the card matches what is shared.
   const [url] = useState(() => shareUrl(game, player))
 
+  // After the night ends the link carries the settlement, so it is a different
+  // thing to send and says so.
+  const settled = game.phase !== 'playing'
   const local = ['localhost', '127.0.0.1'].includes(window.location.hostname)
   const canShare = canShareFiles()
 
@@ -22,15 +25,23 @@ export function ShareTable({ game, onClose }) {
   }
 
   const share = async () => {
-    const result = await shareLink({ title: 'Poker Night', text: 'Tonight’s table', url })
+    const result = await shareLink({
+      title: 'Poker Night',
+      text: settled ? 'How tonight finished' : 'Tonight’s table',
+      url,
+    })
     if (result === 'unsupported') return copy()
     if (result === 'cancelled') setStatus('Share cancelled.')
   }
 
   return (
     <Sheet
-      title="Share the table"
-      hint="Anyone with this link sees the numbers as they are right now. No app, no account."
+      title={settled ? 'Send the result' : 'Share the table'}
+      hint={
+        settled
+          ? 'Final stacks and who owes whom. No app, no account.'
+          : 'Anyone with this link sees the numbers as they are right now. No app, no account.'
+      }
       onClose={onClose}
     >
       <div className="linkbox">{url}</div>

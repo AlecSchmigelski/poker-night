@@ -22,6 +22,11 @@ export const EMPTY = {
   history: [],
   chips: DEFAULT_CHIPS,
   blinds: DEFAULT_BLINDS,
+  // Which roster player is holding this phone. Payment deep links are the only
+  // thing that needs it, and they are wrong without it: a pay link is always
+  // "me paying someone", so on a row the owner is not part of, tapping it
+  // would have them settle somebody else's debt.
+  meId: null,
 }
 
 // Valid JSON of the wrong shape is the dangerous case: it parses, then throws
@@ -36,6 +41,7 @@ export function sanitise(saved) {
     history: list(saved.history, []),
     chips: list(saved.chips, DEFAULT_CHIPS),
     blinds: saved.blinds?.small > 0 ? saved.blinds : DEFAULT_BLINDS,
+    meId: typeof saved.meId === 'string' ? saved.meId : null,
     game:
       saved.game && Array.isArray(saved.game.seats)
         ? { ...saved.game, payments: list(saved.game.payments, []) }

@@ -39,6 +39,9 @@ function reducer(state, action) {
       return { ...state, players: [...state.players, player] }
     }
 
+    case 'SET_ME':
+      return { ...state, meId: action.id }
+
     case 'UPDATE_PLAYER':
       return {
         ...state,
@@ -50,6 +53,7 @@ function reducer(state, action) {
     case 'DELETE_PLAYER':
       return {
         ...state,
+        meId: state.meId === action.id ? null : state.meId,
         players: state.players.filter((p) => p.id !== action.id),
         groups: state.groups.map((g) => ({
           ...g,

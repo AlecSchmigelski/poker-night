@@ -27,6 +27,12 @@
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
 
+  /* The undo toast floats above the dock, over the scroll area. The scroll
+     area reserves exactly its footprint at the bottom so it can never land on
+     top of content. Keep these two in step with .toast's min-height. */
+  --toast-h: 56px;
+  --toast-gap: 8px;
+
   color-scheme: dark;
   font-family: ui-sans-serif, -apple-system, 'SF Pro Text', 'Segoe UI', Inter, Roboto, sans-serif;
   -webkit-text-size-adjust: 100%;
@@ -124,6 +130,16 @@ input { -webkit-appearance: none; }
   padding: 0 18px 8px;
   position: relative;
   z-index: 1;
+}
+
+/* The toast floats above the dock, over the scroll area, on an opaque
+   background — it used to sit squarely on top of "Add player" and "Options"
+   and swallow their taps for the four seconds it was up. While one exists the
+   scroll area grows by exactly its footprint, so it lands on reserved space
+   instead of on content. Growing the padding only extends the scrollable area
+   downwards, so nothing already on screen moves. */
+.main:has(.toast) .scroll {
+  padding-bottom: calc(8px + var(--toast-h) + var(--toast-gap));
 }
 
 .dock {
@@ -456,7 +472,9 @@ input { -webkit-appearance: none; }
   position: absolute;
   left: 18px;
   right: 18px;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + var(--toast-gap));
+  min-height: var(--toast-h);
+  box-sizing: border-box;
   background: #332B26;
   border: 1px solid #473D36;
   border-radius: 14px;
@@ -465,9 +483,16 @@ input { -webkit-appearance: none; }
   justify-content: space-between;
   align-items: center;
   font-size: 14.5px;
+  gap: 12px;
   box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.75);
   animation: rise 0.18s ease;
   z-index: 5;
+}
+.toast > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .toast b { font-weight: 600; font-variant-numeric: tabular-nums; }
 .toast .u { color: var(--brass); font-weight: 640; padding: 4px 6px; }
