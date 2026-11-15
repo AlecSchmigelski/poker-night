@@ -1,5 +1,9 @@
 {
   "appId": "com.alecschmigelski.pitboss",
   "appName": "Pit Boss",
-  "webDir": "dist"
+  "webDir": "dist",
+  "backgroundColor": "#141110",
+  "ios": {
+    "backgroundColor": "#141110"
+  }
 }
