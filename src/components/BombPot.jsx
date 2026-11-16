@@ -3,7 +3,7 @@ import { useStore } from '../store'
 import { fmt } from '../lib/money'
 import { INTERVALS, advance, clock, makeBombPot, status } from '../lib/bombpot'
 import { MoneyInput, Sheet } from './UI'
-import { haptic } from '../lib/device'
+import { cancelBombPot, haptic, scheduleBombPot } from '../lib/device'
 
 // A short two-tone chime, synthesised rather than shipped as an asset. The
 // AudioContext is created on the tap that arms the timer, which is what keeps
@@ -65,6 +65,19 @@ export function BombPot({ openSettings, onCloseSettings, settingsOpen }) {
     haptic('alert')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [due, firing])
+
+  // Hand the deadline to iOS as well as counting it down here. The in-app
+  // chime only reaches you with the app in front; this fires from a locked
+  // phone in someone's pocket. Keyed on nextAt, so re-arming after a bomb pot
+  // replaces the pending one rather than stacking a second banner.
+  useEffect(() => {
+    if (!active || !bomb?.nextAt) {
+      cancelBombPot()
+      return
+    }
+    scheduleBombPot(bomb.nextAt, bomb.ante ? fmt(bomb.ante) : null)
+    return () => cancelBombPot()
+  }, [active, bomb?.nextAt, bomb?.ante])
 
   // Keep the screen awake while a timer is armed — the host puts the phone down
   // between hands and a countdown nobody can see is useless.

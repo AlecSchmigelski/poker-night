@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from './store'
 import { fmt } from './lib/money'
 import { countedTotal, inPlay, potTotal } from './lib/settle'
@@ -6,6 +6,7 @@ import { Home } from './screens/Home'
 import { NightReport } from './screens/NightReport'
 import { PlayerDetail } from './screens/PlayerDetail'
 import { TableSide, hasSide } from './screens/TableSide'
+import { activityState, apply, reconcile, shouldShow } from './lib/liveActivity'
 import { nightReport } from './lib/report'
 import { NewGame } from './screens/NewGame'
 import { Game } from './screens/Game'
@@ -107,6 +108,20 @@ export default function App() {
     right = ['Payments', String(game.payments.length)]
     body = <Settle />
   }
+
+  // The lock screen card follows the game, not any one screen, so it lives at
+  // the shell. Keyed on the numbers it shows: a re-render that changes nothing
+  // sends nothing. The duration is not in the key because the system draws that
+  // clock itself from the start date.
+  const shown = useRef(false)
+  const live = shouldShow(game) ? activityState(game) : null
+  useEffect(() => {
+    const action = reconcile(game, shown.current)
+    if (action === 'none') return
+    shown.current = action !== 'end'
+    apply(action, game)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [live?.potCents, live?.players, live?.stillIn, game?.id, game?.phase])
 
   // The side panel belongs to the game surface. On the other tabs it would only
   // repeat what is already on screen, and it has no place over a night report

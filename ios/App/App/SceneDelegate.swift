@@ -8,7 +8,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = CAPBridgeViewController()
+        // ViewController, not CAPBridgeViewController: the subclass is where the
+        // live activity plugin is handed to the bridge. The storyboard is not
+        // used for the root view controller, so pointing it at the subclass
+        // does nothing — this line is the one that matters.
+        window?.rootViewController = ViewController()
         window?.makeKeyAndVisible()
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)

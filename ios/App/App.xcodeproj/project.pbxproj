@@ -8,18 +8,58 @@
 
 /* Begin PBXBuildFile section */
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
+		3B3B887F222541EF13D9C90D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 91C1ABE060255C74DCF5E7D5 /* WidgetKit.framework */; };
+		41A6C37770487AFC8FBB73FC /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8835AE8D019A301721D7253E /* SwiftUI.framework */; };
+		42B9C1EFFBFD89B9903990A9 /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E7CA9ADC89D313F52AFA704 /* ActivityKit.framework */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
+		4D836403441116AA5ED900AA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C104FA4E19A4167DA25EDA36 /* Foundation.framework */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
 		504EC30D1FED79650016851F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30B1FED79650016851F /* Main.storyboard */; };
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		73BBFAE2362191D332BDA773 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A82163F174071F263AC7BDB /* ViewController.swift */; };
+		815E91D6C71ED291B7BE718D /* PitBossAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C579C6C00AAC2B9FEA4F548 /* PitBossAttributes.swift */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
+		9AF70644C9C6F16AE5E1E4A0 /* PitBossLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80726880ABBA64C267037DB0 /* PitBossLiveActivity.swift */; };
+		D32837B1401BFCCDEC72A76A /* PitBossWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1FD64BA7854D389028BDF92C /* PitBossWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DCEB9BFEBC3C81E29B6D563A /* PitBossAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C579C6C00AAC2B9FEA4F548 /* PitBossAttributes.swift */; };
+		EF073C251565B4E0C228F3E8 /* LiveActivityPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB30EB90D0D7275515E5ED55 /* LiveActivityPlugin.swift */; };
+		FA12521251F9626179461468 /* PitBossWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065CAEFF5FAE47FF3AEF05CC /* PitBossWidgetBundle.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		DF78C8F2343CA16BF3E3C6EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0EF81B2D94349339B1D6331E;
+			remoteInfo = PitBossWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7201317AB5C26AA80783982B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D32837B1401BFCCDEC72A76A /* PitBossWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		065CAEFF5FAE47FF3AEF05CC /* PitBossWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PitBossWidgetBundle.swift; sourceTree = "<group>"; };
+		0CAED5B5541C36D3339441F0 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0E7CA9ADC89D313F52AFA704 /* ActivityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ActivityKit.framework; path = System/Library/Frameworks/ActivityKit.framework; sourceTree = SDKROOT; };
+		1FD64BA7854D389028BDF92C /* PitBossWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PitBossWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
+		3A82163F174071F263AC7BDB /* ViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -28,11 +68,30 @@
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
+		5105B235D3149A0344C69CE0 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		80726880ABBA64C267037DB0 /* PitBossLiveActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PitBossLiveActivity.swift; sourceTree = "<group>"; };
+		8835AE8D019A301721D7253E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		8991A9E9114D0A3CB05A0717 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		91C1ABE060255C74DCF5E7D5 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		9C579C6C00AAC2B9FEA4F548 /* PitBossAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PitBossAttributes.swift; sourceTree = "<group>"; };
+		C104FA4E19A4167DA25EDA36 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		EB30EB90D0D7275515E5ED55 /* LiveActivityPlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveActivityPlugin.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0047D2F6C1EFD79995BE1C91 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D836403441116AA5ED900AA /* Foundation.framework in Frameworks */,
+				3B3B887F222541EF13D9C90D /* WidgetKit.framework in Frameworks */,
+				41A6C37770487AFC8FBB73FC /* SwiftUI.framework in Frameworks */,
+				42B9C1EFFBFD89B9903990A9 /* ActivityKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		504EC3011FED79650016851F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -44,12 +103,36 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0D53DEB85EE74186F18C1E0F /* PitBossWidget */ = {
+			isa = PBXGroup;
+			children = (
+				9C579C6C00AAC2B9FEA4F548 /* PitBossAttributes.swift */,
+				80726880ABBA64C267037DB0 /* PitBossLiveActivity.swift */,
+				065CAEFF5FAE47FF3AEF05CC /* PitBossWidgetBundle.swift */,
+				8991A9E9114D0A3CB05A0717 /* Info.plist */,
+				0CAED5B5541C36D3339441F0 /* Info.plist */,
+				5105B235D3149A0344C69CE0 /* Info.plist */,
+			);
+			name = PitBossWidget;
+			path = PitBossWidget;
+			sourceTree = "<group>";
+		};
+		0F4D527F2598832299AD4D27 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				C104FA4E19A4167DA25EDA36 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				504EC3051FED79650016851F /* Products */,
+				B49846CDE13FB77AF797A4F8 /* Frameworks */,
+				0D53DEB85EE74186F18C1E0F /* PitBossWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,6 +140,7 @@
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
+				1FD64BA7854D389028BDF92C /* PitBossWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -73,13 +157,43 @@
 				504EC3131FED79650016851F /* Info.plist */,
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
+				EB30EB90D0D7275515E5ED55 /* LiveActivityPlugin.swift */,
+				3A82163F174071F263AC7BDB /* ViewController.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		B49846CDE13FB77AF797A4F8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0F4D527F2598832299AD4D27 /* iOS */,
+				91C1ABE060255C74DCF5E7D5 /* WidgetKit.framework */,
+				8835AE8D019A301721D7253E /* SwiftUI.framework */,
+				0E7CA9ADC89D313F52AFA704 /* ActivityKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0EF81B2D94349339B1D6331E /* PitBossWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 60C13E713080F0F3092D15A9 /* Build configuration list for PBXNativeTarget "PitBossWidget" */;
+			buildPhases = (
+				23452A6DDB008704F0A8C900 /* Sources */,
+				0047D2F6C1EFD79995BE1C91 /* Frameworks */,
+				80B45DD085AEEDEFA0BC1567 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PitBossWidget;
+			productName = PitBossWidget;
+			productReference = 1FD64BA7854D389028BDF92C /* PitBossWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		504EC3031FED79650016851F /* App */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 504EC3161FED79650016851F /* Build configuration list for PBXNativeTarget "App" */;
@@ -87,10 +201,12 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				7201317AB5C26AA80783982B /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				04373ECEA03BF3AAB736394C /* PBXTargetDependency */,
 			);
 			name = App;
 			packageProductDependencies = (
@@ -133,6 +249,7 @@
 			projectRoot = "";
 			targets = (
 				504EC3031FED79650016851F /* App */,
+				0EF81B2D94349339B1D6331E /* PitBossWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -151,19 +268,48 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		80B45DD085AEEDEFA0BC1567 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		23452A6DDB008704F0A8C900 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DCEB9BFEBC3C81E29B6D563A /* PitBossAttributes.swift in Sources */,
+				9AF70644C9C6F16AE5E1E4A0 /* PitBossLiveActivity.swift in Sources */,
+				FA12521251F9626179461468 /* PitBossWidgetBundle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		504EC3001FED79650016851F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
+				815E91D6C71ED291B7BE718D /* PitBossAttributes.swift in Sources */,
+				EF073C251565B4E0C228F3E8 /* LiveActivityPlugin.swift in Sources */,
+				73BBFAE2362191D332BDA773 /* ViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		04373ECEA03BF3AAB736394C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = PitBossWidget;
+			target = 0EF81B2D94349339B1D6331E /* PitBossWidget */;
+			targetProxy = DF78C8F2343CA16BF3E3C6EF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		504EC30B1FED79650016851F /* Main.storyboard */ = {
@@ -185,6 +331,32 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		01912C4C0A0782F3557660CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V9SA46NL4G;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PitBossWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.alecschmigelski.pitboss.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		504EC3141FED79650016851F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 958DCC722DB07C7200EA8C5F /* debug.xcconfig */;
@@ -298,8 +470,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = V9SA46NL4G;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V9SA46NL4G;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -321,8 +493,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = V9SA46NL4G;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V9SA46NL4G;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -337,6 +509,31 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		D98A477DD16FAA0B2B513F93 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V9SA46NL4G;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PitBossWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.alecschmigelski.pitboss.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -355,6 +552,15 @@
 			buildConfigurations = (
 				504EC3171FED79650016851F /* Debug */,
 				504EC3181FED79650016851F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		60C13E713080F0F3092D15A9 /* Build configuration list for PBXNativeTarget "PitBossWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				01912C4C0A0782F3557660CF /* Release */,
+				D98A477DD16FAA0B2B513F93 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

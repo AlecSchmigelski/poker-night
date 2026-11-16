@@ -110,3 +110,110 @@ export async function setupNative() {
     return false
   }
 }
+
+// ---------- scheduled alerts ----------
+//
+// The bomb pot timer fires a chime, a haptic and a wake lock, all of which need
+// the app in front of you. The host puts the phone down, and a timer nobody
+// hears is the same as no timer. A scheduled notification is handed to iOS, so
+// it fires whether or not the app is running.
+//
+// Web has no equivalent worth having: a background page is throttled or frozen,
+// so this is a no-op there rather than a promise the browser cannot keep.
+
+const BOMB_POT_ID = 1
+
+export async function canNotify() {
+  const LN = plugin('LocalNotifications')
+  if (!LN) return false
+  try {
+    const { display } = await LN.checkPermissions()
+    if (display === 'granted') return true
+    if (display === 'denied') return false
+    const asked = await LN.requestPermissions()
+    return asked.display === 'granted'
+  } catch {
+    return false
+  }
+}
+
+// `at` is the absolute timestamp the timer is due, the same value the countdown
+// is derived from, so the banner and the on-screen clock cannot disagree.
+export async function scheduleBombPot(at, ante) {
+  const LN = plugin('LocalNotifications')
+  if (!LN) return false
+  if (!(await canNotify())) return false
+  try {
+    await LN.cancel({ notifications: [{ id: BOMB_POT_ID }] })
+    await LN.schedule({
+      notifications: [
+        {
+          id: BOMB_POT_ID,
+          title: 'Bomb pot',
+          body: ante ? `Everyone antes ${ante}.` : 'Everyone antes.',
+          schedule: { at: new Date(at), allowWhileIdle: true },
+        },
+      ],
+    })
+    return true
+  } catch {
+    return false
+  }
+}
+
+export async function cancelBombPot() {
+  const LN = plugin('LocalNotifications')
+  if (!LN) return false
+  try {
+    await LN.cancel({ notifications: [{ id: BOMB_POT_ID }] })
+    return true
+  } catch {
+    return false
+  }
+}
+
+// ---------- live activity ----------
+//
+// The lock screen card. Two numbers the host wants without unlocking: what is
+// on the table, and how long the night has run. The duration is NOT pushed from
+// here — the activity is given a start date and iOS renders the clock itself,
+// so it stays correct with the app closed and costs no updates.
+
+export function canLiveActivity() {
+  return !!plugin('LiveActivity')
+}
+
+export async function startLiveActivity({ startedAt, potCents, players, stillIn }) {
+  const LA = plugin('LiveActivity')
+  if (!LA) return false
+  try {
+    const { supported } = await LA.isSupported()
+    if (!supported) return false
+    const res = await LA.start({ startedAt, potCents, players, stillIn })
+    return !!res?.started
+  } catch {
+    return false
+  }
+}
+
+export async function updateLiveActivity({ potCents, players, stillIn }) {
+  const LA = plugin('LiveActivity')
+  if (!LA) return false
+  try {
+    await LA.update({ potCents, players, stillIn })
+    return true
+  } catch {
+    return false
+  }
+}
+
+export async function endLiveActivity() {
+  const LA = plugin('LiveActivity')
+  if (!LA) return false
+  try {
+    await LA.end()
+    return true
+  } catch {
+    return false
+  }
+}
