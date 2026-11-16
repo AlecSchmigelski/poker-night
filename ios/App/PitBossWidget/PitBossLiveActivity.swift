@@ -61,10 +61,26 @@ struct LockScreenView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("GAME IN PROGRESS")
-                .font(.system(size: 11, weight: .bold))
-                .tracking(1.3)
-                .foregroundStyle(brass)
+            HStack(alignment: .top) {
+                Text("GAME IN PROGRESS")
+                    .font(.system(size: 11, weight: .bold))
+                    .tracking(1.3)
+                    .foregroundStyle(brass)
+
+                Spacer(minLength: 8)
+
+                // The widget cannot reach the app's AppIcon, so it ships its
+                // own copy. Clipped to the same continuous rounded square iOS
+                // masks app icons with, rather than left as a bare square.
+                Image("AppMark")
+                    .resizable()
+                    .frame(width: 26, height: 26)
+                    .clipShape(RoundedRectangle(cornerRadius: 26 * 0.2237, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 26 * 0.2237, style: .continuous)
+                            .strokeBorder(.white.opacity(0.08), lineWidth: 0.5)
+                    )
+            }
 
             Text(money(state.potCents))
                 .font(.system(size: 38, weight: .bold, design: .rounded))
@@ -95,8 +111,8 @@ struct LockScreenView: View {
             }
             .padding(.top, 10)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 13)
+        .padding(.horizontal, 15)
+        .padding(.vertical, 14)
         .background(alignment: .top) {
             // The lamp. Every screen in the app carries one restrained warm
             // wash at the top; without it this is black with text on it.

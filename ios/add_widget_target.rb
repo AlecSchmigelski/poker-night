@@ -38,6 +38,16 @@ group = project['PitBossWidget'] || project.new_group(TARGET, 'PitBossWidget')
 end
 plist_ref = group.new_reference(File.join(WIDGET_DIR, 'Info.plist'))
 
+# The app mark shown on the card. The widget cannot reach the app's AppIcon,
+# so it carries its own copy. Guarded on the file not already being in the
+# phase rather than on the target being new, so it lands on a target that
+# already exists.
+unless widget.resources_build_phase.files_references.any? { |r| r.path.to_s.include?('Assets.xcassets') }
+  assets = group.new_reference(File.join(WIDGET_DIR, 'Assets.xcassets'))
+  widget.resources_build_phase.add_file_reference(assets)
+  puts 'added Assets.xcassets to the widget'
+end
+
 # The plugin lives in the app target, next to the rest of the app's Swift.
 app_group = project.main_group['App'] || project.main_group
 # ViewController registers the plugin with the bridge; without it the plugin
