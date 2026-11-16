@@ -18,13 +18,15 @@ export function Ledger({ onOpen, onOpenPlayer }) {
             Finish a night and it lands here, with everyone's running total.
           </Empty>
 
-          {/* A roster is worth keeping before the first night is played, which
-              is also the case where someone is moving between devices. */}
-          {state.players.length > 0 && (
-            <div className="subrow">
-              <button className="lnk" onClick={() => setBackup(true)}>Back up or restore</button>
-            </div>
-          )}
+          {/* Always reachable, including on a phone with nothing on it. This
+              used to be hidden until the roster had someone in it, which got
+              it exactly backwards: an empty app is the one that needs to
+              restore, and a new phone is empty by definition. */}
+          <div className="subrow">
+            <button className="lnk" onClick={() => setBackup(true)}>
+              {state.players.length > 0 ? 'Back up or restore' : 'Restore from a backup'}
+            </button>
+          </div>
         </div>
         <Dock>
           <div className="btn ghost" style={{ opacity: 0.6 }}>Start a game from the Game tab</div>

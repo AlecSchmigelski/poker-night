@@ -12,6 +12,8 @@ export function Backup({ onClose }) {
   const [error, setError] = useState(null)
   const [done, setDone] = useState(null)
   const fileRef = useRef(null)
+  // A fresh install can still restore; it just has nothing of its own to write.
+  const empty = state.players.length === 0 && state.history.length === 0
 
   const save = async () => {
     const name = backupName()
@@ -115,8 +117,13 @@ export function Backup({ onClose }) {
       {error && <div className="warn">{error}</div>}
       {done && <div className="meta" style={{ marginTop: 12 }}>{done}</div>}
 
-      <button className="btn" style={{ marginTop: 16 }} onClick={save}>
-        Save a backup
+      <button
+        className={`btn${empty ? ' off' : ''}`}
+        style={{ marginTop: 16 }}
+        disabled={empty}
+        onClick={save}
+      >
+        {empty ? 'Nothing to back up yet' : 'Save a backup'}
       </button>
       <button className="btn ghost" onClick={() => fileRef.current?.click()}>
         Restore from a file
