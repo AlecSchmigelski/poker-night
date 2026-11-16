@@ -18,6 +18,36 @@ private func money(_ cents: Int) -> String {
         : String(format: "$%.2f", Double(cents) / 100)
 }
 
+// Durations are computed here rather than handed to SwiftUI's .timer or
+// .relative styles. Those draw themselves and never go stale, which is why the
+// first pass used them, but neither can be told what grain to use: .timer ticks
+// seconds forever, and .relative renders "2 min, 15 sec" — which truncates to
+// "2 min, 1…" in the compact island. Computing costs staleness between activity
+// updates and buys exact control of the format.
+
+// "7m" under the hour, "1h 20m" over it. Never seconds: on a glance surface
+// they are noise, and they make the value jitter at a width it cannot afford.
+private func elapsed(since start: Date) -> String {
+    let minutes = max(0, Int(Date().timeIntervalSince(start) / 60))
+    return minutes < 60 ? "\(minutes)m" : "\(minutes / 60)h \(minutes % 60)m"
+}
+
+// Whole hours for the compact island, where there is room for about four
+// characters. "<1h" rather than a bare "0h", which reads as a broken clock.
+private func hoursOnly(since start: Date) -> String {
+    let hours = Int(Date().timeIntervalSince(start) / 3600)
+    return hours < 1 ? "<1h" : "\(hours)h"
+}
+
+// Counting down to the next bomb pot. Past due reads "Now" rather than running
+// negative: the app only re-arms the timer while it is open, so a deadline can
+// sit in the past until the host comes back to it.
+private func countdown(to due: Date) -> String {
+    let minutes = Int(due.timeIntervalSinceNow / 60)
+    if minutes < 1 { return "Now" }
+    return minutes < 60 ? "\(minutes)m" : "\(minutes / 60)h \(minutes % 60)m"
+}
+
 // One of the three small boxes along the bottom, same as the app's home card:
 // a quiet label over a bold value, on a raised panel.
 @available(iOS 16.2, *)
@@ -98,21 +128,13 @@ struct LockScreenView: View {
                 .padding(.top, 1)
 
             HStack(spacing: 7) {
-                // `.relative`, not `.timer`: a stopwatch ticking seconds is the
-                // wrong grain for "how long has this been going", and it is the
-                // system that draws it either way. Coarse also means never
-                // stale — the app cannot push an update from behind a locked
-                // screen, so anything pre-formatted would freeze there.
                 Tile(label: "Running") {
-                    Text(context.attributes.startedAt, style: .relative)
+                    Text(elapsed(since: context.attributes.startedAt))
                 }
                 Tile(label: "Buy-in") { Text(money(state.buyInCents)) }
-                // `.relative` again, for the same reason as Running: minute
-                // grain, drawn by the system, so it keeps counting down behind
-                // a locked screen where the app cannot push.
                 Tile(label: "Bomb pot") {
                     if let due = state.bombPotAt {
-                        Text(due, style: .relative)
+                        Text(countdown(to: due))
                     } else {
                         Text("Off").foregroundStyle(smoke)
                     }
@@ -155,7 +177,11 @@ struct PitBossLiveActivity: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("GAME IN PROGRESS")
+                        // Shorter than the lock screen's "GAME IN PROGRESS",
+                        // which wraps to two lines in this narrow region and
+                        // pushes the amount down. This also labels the number
+                        // under it, which the longer eyebrow does not.
+                        Text("ON THE TABLE")
                             .font(.system(size: 10, weight: .bold))
                             .tracking(1.1)
                             .foregroundStyle(brass)
@@ -164,6 +190,10 @@ struct PitBossLiveActivity: Widget {
                             .monospacedDigit()
                             .foregroundStyle(chalk)
                     }
+                    // The expanded regions butt right up to the island's edge
+                    // on their own; nothing in the layout gives them room.
+                    .padding(.leading, 6)
+                    .padding(.top, 2)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     VStack(alignment: .trailing, spacing: 1) {
@@ -171,7 +201,7 @@ struct PitBossLiveActivity: Widget {
                             .font(.system(size: 10, weight: .bold))
                             .tracking(1.1)
                             .foregroundStyle(smoke)
-                        Text(context.attributes.startedAt, style: .timer)
+                        Text(elapsed(since: context.attributes.startedAt))
                             .font(.system(size: 17, weight: .semibold, design: .rounded))
                             .monospacedDigit()
                             .foregroundStyle(chalk)
@@ -179,22 +209,27 @@ struct PitBossLiveActivity: Widget {
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
                     }
+                    .padding(.trailing, 6)
+                    .padding(.top, 2)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     Text("\(money(context.state.boughtInCents)) bought in · \(context.state.stillIn) still playing")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(smoke)
-                        .padding(.top, 2)
+                        .padding(.top, 4)
+                        .padding(.horizontal, 6)
+                        .padding(.bottom, 2)
                 }
             } compactLeading: {
                 Text(money(context.state.potCents))
                     .monospacedDigit()
                     .foregroundStyle(chalk)
             } compactTrailing: {
-                Text(context.attributes.startedAt, style: .timer)
+                Text(hoursOnly(since: context.attributes.startedAt))
                     .monospacedDigit()
                     .foregroundStyle(smoke)
-                    .frame(maxWidth: 44)
+                    .frame(maxWidth: 46)
+                    .lineLimit(1)
             } minimal: {
                 Image(systemName: "suit.spade.fill").foregroundStyle(brass)
             }
