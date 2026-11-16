@@ -114,12 +114,12 @@ export default function App() {
   // sends nothing. The duration is not in the key because the system draws that
   // clock itself from the start date.
   const shown = useRef(false)
-  const live = shouldShow(game) ? activityState(game) : null
+  const live = shouldShow(game) ? activityState(game, player) : null
   useEffect(() => {
     const action = reconcile(game, shown.current)
     if (action === 'none') return
     shown.current = action !== 'end'
-    apply(action, game)
+    apply(action, game, player)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [live?.potCents, live?.players, live?.stillIn, game?.id, game?.phase])
 

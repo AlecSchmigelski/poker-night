@@ -3,11 +3,18 @@ import { endLiveActivity, startLiveActivity, updateLiveActivity } from './device
 
 // What the lock screen card shows, derived from the same functions the Game
 // screen uses so the two can never disagree.
-export function activityState(game) {
+export function activityState(game, player) {
+  const out = new Set(game.seats.filter((s) => s.cashOut != null).map((s) => s.playerId))
   return {
     potCents: potTotal(game),
     players: game.seats.length,
     stillIn: stillIn(game).length,
+    // Seat order, with each player's own chip colour, so the card reads as the
+    // table rather than as a number. Dimmed once someone has cashed out.
+    seats: game.seats.map((s) => ({
+      color: player?.(s.playerId)?.color ?? '#A69890',
+      out: out.has(s.playerId),
+    })),
   }
 }
 
@@ -27,10 +34,10 @@ export function reconcile(game, shown) {
 
 // Applies that decision. Separate from the decision itself so the decision can
 // be tested, which is the half with the rules in it.
-export async function apply(action, game) {
+export async function apply(action, game, player) {
   if (action === 'end') return endLiveActivity()
   if (action === 'none') return false
-  const state = activityState(game)
+  const state = activityState(game, player)
   if (action === 'update') return updateLiveActivity(state)
   return startLiveActivity({ startedAt: game.startedAt, ...state })
 }

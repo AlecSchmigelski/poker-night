@@ -32,10 +32,19 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @available(iOS 16.2, *)
     private func state(from call: CAPPluginCall) -> PitBossAttributes.ContentState {
-        PitBossAttributes.ContentState(
+        // Seats arrive as [{ color, out }]. Anything malformed is dropped
+        // rather than defaulted: a seat drawn in the wrong colour is worse
+        // than one missing, because the strip is read as the table.
+        let raw = call.getArray("seats", JSObject.self) ?? []
+        let seats: [PitBossAttributes.Seat] = raw.compactMap { entry in
+            guard let color = entry["color"] as? String else { return nil }
+            return PitBossAttributes.Seat(color: color, out: (entry["out"] as? Bool) ?? false)
+        }
+        return PitBossAttributes.ContentState(
             potCents: call.getInt("potCents") ?? 0,
             players: call.getInt("players") ?? 0,
-            stillIn: call.getInt("stillIn") ?? 0
+            stillIn: call.getInt("stillIn") ?? 0,
+            seats: seats
         )
     }
 
