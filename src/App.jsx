@@ -121,7 +121,7 @@ export default function App() {
     shown.current = action !== 'end'
     apply(action, game)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [live?.potCents, live?.boughtInCents, live?.players, live?.stillIn, game?.id, game?.phase])
+  }, [live?.potCents, live?.boughtInCents, live?.players, live?.stillIn, live?.bombPotAt, game?.id, game?.phase])
 
   // The side panel belongs to the game surface. On the other tabs it would only
   // repeat what is already on screen, and it has no place over a night report

@@ -17,6 +17,10 @@ struct PitBossAttributes: ActivityAttributes {
         var buyInCents: Int
         var players: Int
         var stillIn: Int
+        // When the next bomb pot is due. Nil when no timer is armed. Unlike
+        // the night's start this moves — every time one fires it re-arms — so
+        // it belongs in the state rather than in the attributes.
+        var bombPotAt: Date?
     }
 
     // Fixed for the life of the activity. The duration is rendered from this by

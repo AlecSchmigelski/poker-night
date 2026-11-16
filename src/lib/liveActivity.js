@@ -14,6 +14,10 @@ export function activityState(game) {
     buyInCents: game.defaultBuyIn,
     players: game.seats.length,
     stillIn: stillIn(game).length,
+    // Absolute milliseconds, the same value the in-app countdown is derived
+    // from, so the card and the screen cannot disagree. Null when no timer is
+    // armed, which the card shows as "Off".
+    bombPotAt: game.bombPot?.on ? game.bombPot.nextAt : null,
   }
 }
 

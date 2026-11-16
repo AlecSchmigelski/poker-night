@@ -46,6 +46,16 @@ check('one cashed out shows as one out',
 // bought in stays put when someone leaves; only what is on the table moves.
 check('bought in survives a cash-out', activityState(oneOut).boughtInCents, 8000)
 
+// The bomb pot tile counts down to the same absolute timestamp the in-app
+// countdown uses, so the card and the screen cannot drift apart. No timer
+// armed reads as "Off" on the card, which is a null here.
+check('no bomb pot is null', activityState(playing).bombPotAt, null)
+const armed = { ...playing, bombPot: { on: true, minutes: 15, ante: 500, nextAt: 9_999_000, count: 0 } }
+check('an armed timer carries its deadline', activityState(armed).bombPotAt, 9_999_000)
+const disarmed = { ...playing, bombPot: { on: false, minutes: 15, ante: 500, nextAt: 9_999_000, count: 2 } }
+check('a switched-off timer is null, not a stale deadline',
+  activityState(disarmed).bombPotAt, null)
+
 // --- when it shows ---------------------------------------------------------
 //
 // Only during play. A pot frozen on the lock screen after the night ended is

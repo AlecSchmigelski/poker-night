@@ -37,7 +37,8 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
             boughtInCents: call.getInt("boughtInCents") ?? 0,
             buyInCents: call.getInt("buyInCents") ?? 0,
             players: call.getInt("players") ?? 0,
-            stillIn: call.getInt("stillIn") ?? 0
+            stillIn: call.getInt("stillIn") ?? 0,
+            bombPotAt: call.getDouble("bombPotAt").map { Date(timeIntervalSince1970: $0 / 1000) }
         )
     }
 

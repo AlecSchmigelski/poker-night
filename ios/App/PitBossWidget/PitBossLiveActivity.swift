@@ -107,7 +107,16 @@ struct LockScreenView: View {
                     Text(context.attributes.startedAt, style: .relative)
                 }
                 Tile(label: "Buy-in") { Text(money(state.buyInCents)) }
-                Tile(label: "Players") { Text("\(state.players)") }
+                // `.relative` again, for the same reason as Running: minute
+                // grain, drawn by the system, so it keeps counting down behind
+                // a locked screen where the app cannot push.
+                Tile(label: "Bomb pot") {
+                    if let due = state.bombPotAt {
+                        Text(due, style: .relative)
+                    } else {
+                        Text("Off").foregroundStyle(smoke)
+                    }
+                }
             }
             .padding(.top, 10)
         }
