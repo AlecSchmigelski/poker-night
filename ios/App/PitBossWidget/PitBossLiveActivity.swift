@@ -4,10 +4,11 @@ import WidgetKit
 
 // The app's palette, from src/index.css.
 private let table = Color(red: 0.078, green: 0.067, blue: 0.063)
+private let rail = Color(red: 0.161, green: 0.137, blue: 0.125)
+private let hairline = Color(red: 0.220, green: 0.188, blue: 0.169)
 private let brass = Color(red: 0.914, green: 0.631, blue: 0.231)
 private let chalk = Color(red: 0.953, green: 0.925, blue: 0.890)
 private let smoke = Color(red: 0.651, green: 0.596, blue: 0.565)
-private let hairline = Color(red: 0.220, green: 0.188, blue: 0.169)
 
 // Whole dollars when it divides evenly, which at a home game it almost always
 // does. A lock screen is read at a glance and ".00" is noise.
@@ -17,59 +18,41 @@ private func money(_ cents: Int) -> String {
         : String(format: "$%.2f", Double(cents) / 100)
 }
 
-private func hex(_ s: String) -> Color {
-    var v: UInt64 = 0
-    Scanner(string: s.replacingOccurrences(of: "#", with: "")).scanHexInt64(&v)
-    return Color(
-        red: Double((v >> 16) & 0xFF) / 255,
-        green: Double((v >> 8) & 0xFF) / 255,
-        blue: Double(v & 0xFF) / 255
-    )
-}
-
+// One of the three small boxes along the bottom, same as the app's home card:
+// a quiet label over a bold value, on a raised panel.
 @available(iOS 16.2, *)
-private struct Eyebrow: View {
-    let text: String
-    var body: some View {
-        Text(text)
-            .font(.system(size: 10, weight: .semibold))
-            .tracking(1.2)
-            .foregroundStyle(smoke)
-    }
-}
-
-// The table, as chips. One dot per seat in roster colour, dimmed once someone
-// cashes out — so a glance says both how many are left and that the night is
-// winding down, without a single word. This is the app's own identity: player
-// colours are real clay denominations.
-@available(iOS 16.2, *)
-private struct SeatStrip: View {
-    let seats: [PitBossAttributes.Seat]
-    var dot: CGFloat = 9
+private struct Tile<Value: View>: View {
+    let label: String
+    @ViewBuilder var value: Value
 
     var body: some View {
-        HStack(spacing: 5) {
-            ForEach(Array(seats.prefix(12).enumerated()), id: \.offset) { _, seat in
-                Circle()
-                    .fill(hex(seat.color))
-                    .frame(width: dot, height: dot)
-                    .opacity(seat.out ? 0.22 : 1)
-                    .overlay(
-                        Circle().strokeBorder(.white.opacity(seat.out ? 0 : 0.14), lineWidth: 0.5)
-                    )
-            }
-            if seats.count > 12 {
-                Text("+\(seats.count - 12)")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(smoke)
-            }
+        VStack(alignment: .leading, spacing: 1) {
+            Text(label)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(smoke)
+            value
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(chalk)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(rail.opacity(0.55))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        .strokeBorder(hairline, lineWidth: 1)
+                )
+        )
     }
 }
 
-// Lock screen. One hero number — the pot — with the clock as quiet metadata
-// beside it, not competing. Brass is reserved for the seat strip's live dots
-// and the hairline, so the eye lands on the money first.
+// The lock screen card is the app's own "game in progress" card. Same eyebrow,
+// same hero number, same supporting line, same three tiles — so it is read
+// without being learned.
 @available(iOS 16.2, *)
 struct LockScreenView: View {
     let context: ActivityViewContext<PitBossAttributes>
@@ -78,65 +61,61 @@ struct LockScreenView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .firstTextBaseline) {
-                Eyebrow(text: "ON THE TABLE")
-                Spacer()
-                Eyebrow(text: "RUNNING")
+            Text("GAME IN PROGRESS")
+                .font(.system(size: 11, weight: .bold))
+                .tracking(1.3)
+                .foregroundStyle(brass)
+
+            Text(money(state.potCents))
+                .font(.system(size: 38, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(chalk)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .padding(.top, 2)
+
+            Text(summary)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(smoke)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .padding(.top, 1)
+
+            HStack(spacing: 7) {
+                // `.relative`, not `.timer`: a stopwatch ticking seconds is the
+                // wrong grain for "how long has this been going", and it is the
+                // system that draws it either way. Coarse also means never
+                // stale — the app cannot push an update from behind a locked
+                // screen, so anything pre-formatted would freeze there.
+                Tile(label: "Running") {
+                    Text(context.attributes.startedAt, style: .relative)
+                }
+                Tile(label: "Buy-in") { Text(money(state.buyInCents)) }
+                Tile(label: "Players") { Text("\(state.players)") }
             }
-
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Text(money(state.potCents))
-                    .font(.system(size: 40, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(chalk)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-
-                Spacer(minLength: 0)
-
-                // Deliberately smaller and in smoke. It is context, not the
-                // headline, and it was previously shouting louder than the pot.
-                Text(context.attributes.startedAt, style: .timer)
-                    .font(.system(size: 19, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(smoke)
-                    .multilineTextAlignment(.trailing)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-                    .frame(maxWidth: 108, alignment: .trailing)
-            }
-            .padding(.top, 2)
-
-            Rectangle()
-                .fill(hairline)
-                .frame(height: 1)
-                .padding(.vertical, 11)
-
-            HStack(spacing: 10) {
-                SeatStrip(seats: state.seats)
-                Spacer(minLength: 6)
-                Text(seatLine)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(smoke)
-                    .lineLimit(1)
-            }
+            .padding(.top, 10)
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 15)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 13)
         .background(alignment: .top) {
-            // The lamp. Every screen in the app has one restrained warm wash at
-            // the top; without it this card is just black with text on it.
+            // The lamp. Every screen in the app carries one restrained warm
+            // wash at the top; without it this is black with text on it.
             RadialGradient(
-                colors: [brass.opacity(0.13), .clear],
-                center: .top, startRadius: 0, endRadius: 190
+                colors: [brass.opacity(0.14), .clear],
+                center: .top, startRadius: 0, endRadius: 200
             )
         }
     }
 
-    private var seatLine: String {
-        state.stillIn < state.players
-            ? "\(state.stillIn) of \(state.players) still in"
-            : "\(state.players) player\(state.players == 1 ? "" : "s")"
+    // "$300 bought in · 5 still playing · 1 cashed out" — the cashed-out clause
+    // only once somebody has, so an untouched table does not read as a list of
+    // zeroes.
+    private var summary: String {
+        let out = state.players - state.stillIn
+        var parts = ["\(money(state.boughtInCents)) bought in",
+                     "\(state.stillIn) still playing"]
+        if out > 0 { parts.append("\(out) cashed out") }
+        return parts.joined(separator: " · ")
     }
 }
 
@@ -151,7 +130,10 @@ struct PitBossLiveActivity: Widget {
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     VStack(alignment: .leading, spacing: 1) {
-                        Eyebrow(text: "ON THE TABLE")
+                        Text("GAME IN PROGRESS")
+                            .font(.system(size: 10, weight: .bold))
+                            .tracking(1.1)
+                            .foregroundStyle(brass)
                         Text(money(context.state.potCents))
                             .font(.system(size: 28, weight: .bold, design: .rounded))
                             .monospacedDigit()
@@ -160,25 +142,24 @@ struct PitBossLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     VStack(alignment: .trailing, spacing: 1) {
-                        Eyebrow(text: "RUNNING")
+                        Text("RUNNING")
+                            .font(.system(size: 10, weight: .bold))
+                            .tracking(1.1)
+                            .foregroundStyle(smoke)
                         Text(context.attributes.startedAt, style: .timer)
                             .font(.system(size: 17, weight: .semibold, design: .rounded))
                             .monospacedDigit()
-                            .foregroundStyle(smoke)
+                            .foregroundStyle(chalk)
                             .frame(maxWidth: 92, alignment: .trailing)
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
                     }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack(spacing: 10) {
-                        SeatStrip(seats: context.state.seats, dot: 8)
-                        Spacer(minLength: 6)
-                        Text("\(context.state.stillIn) of \(context.state.players) still in")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(smoke)
-                    }
-                    .padding(.top, 4)
+                    Text("\(money(context.state.boughtInCents)) bought in · \(context.state.stillIn) still playing")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(smoke)
+                        .padding(.top, 2)
                 }
             } compactLeading: {
                 Text(money(context.state.potCents))

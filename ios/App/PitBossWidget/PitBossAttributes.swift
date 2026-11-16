@@ -6,23 +6,17 @@ import Foundation
 // must be identical on each side or the activity silently fails to decode.
 @available(iOS 16.2, *)
 struct PitBossAttributes: ActivityAttributes {
-    // One seat at the table. Carries the player's chip colour so the card can
-    // be read as the table itself rather than as a count: the same colours the
-    // app gives people, in the same order, dimming as they cash out.
-    public struct Seat: Codable, Hashable {
-        var color: String // "#RRGGBB", straight from the roster
-        var out: Bool
-    }
-
-    // Everything that changes while the night runs. A content state is capped
-    // at 4KB; a dozen seats is a few hundred bytes.
+    // Everything that changes while the night runs. These are exactly the
+    // numbers the app's own "game in progress" card shows, because the lock
+    // screen card is that card: a host who has seen one has seen the other.
     public struct ContentState: Codable, Hashable {
         // Cents, like every other amount in this app. Formatting happens at the
         // edge so rounding never creeps into a total.
-        var potCents: Int
+        var potCents: Int // still in front of people
+        var boughtInCents: Int // everything ever put on the table
+        var buyInCents: Int
         var players: Int
         var stillIn: Int
-        var seats: [Seat]
     }
 
     // Fixed for the life of the activity. The duration is rendered from this by

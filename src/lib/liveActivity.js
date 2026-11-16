@@ -1,20 +1,19 @@
-import { potTotal, stillIn } from './settle.js'
+import { inPlay, potTotal, stillIn } from './settle.js'
 import { endLiveActivity, startLiveActivity, updateLiveActivity } from './device.js'
 
-// What the lock screen card shows, derived from the same functions the Game
-// screen uses so the two can never disagree.
-export function activityState(game, player) {
-  const out = new Set(game.seats.filter((s) => s.cashOut != null).map((s) => s.playerId))
+// The lock screen card is the app's own "game in progress" card, so it shows
+// exactly the same numbers, derived the same way. If the two ever disagree one
+// of them is lying, and the host cannot tell which.
+export function activityState(game) {
   return {
-    potCents: potTotal(game),
+    // "On the table" means what is still in front of people, which is what the
+    // Game header means by it too. Once someone cashes out this diverges from
+    // the total bought in, and both are on the card.
+    potCents: inPlay(game),
+    boughtInCents: potTotal(game),
+    buyInCents: game.defaultBuyIn,
     players: game.seats.length,
     stillIn: stillIn(game).length,
-    // Seat order, with each player's own chip colour, so the card reads as the
-    // table rather than as a number. Dimmed once someone has cashed out.
-    seats: game.seats.map((s) => ({
-      color: player?.(s.playerId)?.color ?? '#A69890',
-      out: out.has(s.playerId),
-    })),
   }
 }
 
@@ -34,10 +33,10 @@ export function reconcile(game, shown) {
 
 // Applies that decision. Separate from the decision itself so the decision can
 // be tested, which is the half with the rules in it.
-export async function apply(action, game, player) {
+export async function apply(action, game) {
   if (action === 'end') return endLiveActivity()
   if (action === 'none') return false
-  const state = activityState(game, player)
+  const state = activityState(game)
   if (action === 'update') return updateLiveActivity(state)
   return startLiveActivity({ startedAt: game.startedAt, ...state })
 }

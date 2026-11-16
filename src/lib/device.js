@@ -183,24 +183,24 @@ export function canLiveActivity() {
   return !!plugin('LiveActivity')
 }
 
-export async function startLiveActivity({ startedAt, potCents, players, stillIn }) {
+export async function startLiveActivity(state) {
   const LA = plugin('LiveActivity')
   if (!LA) return false
   try {
     const { supported } = await LA.isSupported()
     if (!supported) return false
-    const res = await LA.start({ startedAt, potCents, players, stillIn })
+    const res = await LA.start(state)
     return !!res?.started
   } catch {
     return false
   }
 }
 
-export async function updateLiveActivity({ potCents, players, stillIn }) {
+export async function updateLiveActivity(state) {
   const LA = plugin('LiveActivity')
   if (!LA) return false
   try {
-    await LA.update({ potCents, players, stillIn })
+    await LA.update(state)
     return true
   } catch {
     return false
